@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% block title %}Admin Panel{% endblock %}
+{% block page_title %}⚙️ Admin Control Panel{% endblock %}
+{% block header_actions %}
+<a href="{{ url_for('admin.users') }}" class="px-4 py-2 rounded-lg bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 transition-colors text-sm font-semibold flex items-center gap-2">
+  <i class="ri-team-line"></i> Users
+</a>
+<a href="{{ url_for('admin.reports') }}" class="px-4 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors text-sm font-semibold flex items-center gap-2">
+  <i class="ri-alarm-warning-line"></i> Reports
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Admin Stats -->
+<div class="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
+  <div class="glass-card p-5 border-blue-500/20 flex flex-col justify-between hover:bg-slate-800/80 transition-colors">
+    <div class="w-10 h-10 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl mb-4">
+      <i class="ri-team-fill"></i>
+    </div>
+    <div class="text-2xl font-bold text-white mb-1 font-heading">{{ total_users }}</div>
+    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Users</div>
+  </div>
+  
+  <div class="glass-card p-5 border-emerald-500/20 flex flex-col justify-between hover:bg-slate-800/80 transition-colors">
+    <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl mb-4">
+      <i class="ri-message-3-fill"></i>
+    </div>
+    <div class="text-2xl font-bold text-white mb-1 font-heading">{{ total_chats }}</div>
+    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Chats</div>
+  </div>
+  
+  <div class="glass-card p-5 border-amber-500/20 flex flex-col justify-between hover:bg-slate-800/80 transition-colors">
+    <div class="w-10 h-10 rounded-lg bg-amber-500/20 text-amber-400 flex items-center justify-center text-xl mb-4">
+      <i class="ri-folder-open-fill"></i>
+    </div>
+    <div class="text-2xl font-bold text-white mb-1 font-heading">{{ open_reports }}</div>
+    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Open Reports</div>
+  </div>
+  
+  <div class="glass-card p-5 border-red-500/30 bg-red-500/5 flex flex-col justify-between hover:bg-red-500/10 transition-colors">
+    <div class="w-10 h-10 rounded-lg bg-red-500/20 text-red-500 flex items-center justify-center text-xl mb-4 emergency-pulse">
+      <i class="ri-alarm-warning-fill"></i>
+    </div>
+    <div class="text-2xl font-bold text-red-500 mb-1 font-heading">{{ critical_reports }}</div>
+    <div class="text-xs font-bold text-red-500/70 uppercase tracking-wider">Critical Open</div>
+  </div>
+  
+  <div class="glass-card p-5 border-purple-500/20 flex flex-col justify-between hover:bg-slate-800/80 transition-colors">
+    <div class="w-10 h-10 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center text-xl mb-4">
+      <i class="ri-share-forward-2-fill"></i>
+    </div>
+    <div class="text-2xl font-bold text-white mb-1 font-heading">{{ escalated_count }}</div>
+    <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Escalated</div>
+  </div>
+</div>
+
+<!-- Intent Distribution -->
+{% if intent_data %}
+<div class="glass-card p-6 mb-6">
+  <h3 class="text-lg font-bold text-white font-heading mb-4 flex items-center gap-2">
+    <i class="ri-pie-chart-2-fill text-blue-400"></i> Query Intent Breakdown
+  </h3>
+  <div class="space-y-4">
+    {% set total = intent_data.values() | sum %}
+    {% for intent, count in intent_data.items() | sort(attribute='1', reverse=True) %}
+    {% set pct = ((count / total) * 100) | round(1) if total > 0 else 0 %}
+    <div>
+      <div class="flex justify-between text-xs font-medium mb-1.5">
+        <span class="text-slate-300 capitalize">{{ intent.replace('_',' ') }}</span>
+        <span class="text-slate-500">{{ count }} ({{ pct }}%)</span>
+      </div>
+      <div class="w-full bg-slate-800 rounded-full h-1.5 overflow-hidden">
+        <div class="bg-gradient-to-r from-blue-500 to-cyan-400 h-1.5 rounded-full transition-all duration-1000" style="width: {{ pct }}%"></div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+
+<div class="grid lg:grid-cols-2 gap-6 mb-6">
+  <!-- Recent Chats -->
+  <div class="glass-card p-6 flex flex-col h-full">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-white font-heading flex items-center gap-2">
+        <i class="ri-chat-history-fill text-blue-400"></i> Recent Chats
+      </h3>
+      <a href="{{ url_for('admin.chats') }}" class="text-xs font-semibold text-blue-400 hover:text-blue-300">View All</a>
+    </div>
+    <div class="flex-1 overflow-x-auto custom-scrollbar">
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="text-xs uppercase tracking-wider text-slate-500 border-b border-slate-700/50">
+            <th class="pb-3 font-semibold">User Message</th>
+            <th class="pb-3 font-semibold">Intent</th>
+            <th class="pb-3 font-semibold">Severity</th>
+            <th class="pb-3 font-semibold">Time</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-700/50">
+          {% for chat in recent_chats %}
+          <tr class="hover:bg-slate-800/40 transition-colors">
+            <td class="py-3 pr-4 max-w-[120px] truncate text-slate-300" title="{{ chat.user_message }}">
+              {{ chat.user_message }}
+            </td>
+            <td class="py-3 pr-4">
+              <span class="px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] uppercase font-bold tracking-wider">
+                {{ chat.intent.replace('_',' ') }}
+              </span>
+            </td>
+            <td class="py-3 pr-4">
+              {% if chat.severity == 'critical' %}
+                <span class="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] uppercase font-bold tracking-wider">Critical</span>
+              {% elif chat.severity == 'high' %}
+                <span class="px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] uppercase font-bold tracking-wider">High</span>
+              {% elif chat.severity == 'medium' %}
+                <span class="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] uppercase font-bold tracking-wider">Medium</span>
+              {% else %}
+                <span class="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] uppercase font-bold tracking-wider">Low</span>
+              {% endif %}
+            </td>
+            <td class="py-3 text-slate-500 whitespace-nowrap text-xs">{{ chat.timestamp.strftime('%m/%d %H:%M') if chat.timestamp }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recent Reports -->
+  <div class="glass-card p-6 flex flex-col h-full">
+    <div class="flex items-center justify-between mb-4">
+      <h3 class="text-lg font-bold text-white font-heading flex items-center gap-2">
+        <i class="ri-alarm-warning-fill text-red-400"></i> Emergency Reports
+      </h3>
+      <a href="{{ url_for('admin.reports') }}" class="text-xs font-semibold text-blue-400 hover:text-blue-300">View All</a>
+    </div>
+    <div class="flex-1 overflow-x-auto custom-scrollbar">
+      <table class="w-full text-left text-sm">
+        <thead>
+          <tr class="text-xs uppercase tracking-wider text-slate-500 border-b border-slate-700/50">
+            <th class="pb-3 font-semibold">Type</th>
+            <th class="pb-3 font-semibold">Location</th>
+            <th class="pb-3 font-semibold">Severity</th>
+            <th class="pb-3 font-semibold">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-700/50">
+          {% for report in recent_reports %}
+          <tr class="hover:bg-slate-800/40 transition-colors">
+            <td class="py-3 pr-4 font-medium text-slate-300 capitalize">{{ report.disaster_type }}</td>
+            <td class="py-3 pr-4 text-slate-400 text-xs">{{ report.location or 'Unknown' }}</td>
+            <td class="py-3 pr-4">
+              {% if report.severity == 'critical' %}
+                <span class="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] uppercase font-bold tracking-wider">Critical</span>
+              {% elif report.severity == 'high' %}
+                <span class="px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] uppercase font-bold tracking-wider">High</span>
+              {% else %}
+                <span class="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] uppercase font-bold tracking-wider">{{ report.severity }}</span>
+              {% endif %}
+            </td>
+            <td class="py-3">
+              <select onchange="updateStatus({{ report.id }}, this.value)"
+                      class="bg-slate-800 border border-slate-700 text-slate-300 text-xs rounded px-2 py-1 focus:ring-1 focus:ring-blue-500"
+                      id="status-{{ report.id }}">
+                {% for s in ['open','in_progress','resolved','closed'] %}
+                <option value="{{ s }}" {% if s == report.status %}selected{% endif %}>{{ s.replace('_',' ').title() }}</option>
+                {% endfor %}
+              </select>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Admin Logs -->
+<div class="glass-card p-6">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-bold text-white font-heading flex items-center gap-2">
+      <i class="ri-file-list-3-fill text-purple-400"></i> Admin Activity Log
+    </h3>
+    <a href="{{ url_for('admin.logs') }}" class="text-xs font-semibold text-blue-400 hover:text-blue-300">Full Audit Log</a>
+  </div>
+  <div class="overflow-x-auto custom-scrollbar">
+    <table class="w-full text-left text-sm">
+      <thead>
+        <tr class="text-xs uppercase tracking-wider text-slate-500 border-b border-slate-700/50">
+          <th class="pb-3 font-semibold">Admin</th>
+          <th class="pb-3 font-semibold">Action</th>
+          <th class="pb-3 font-semibold">Details</th>
+          <th class="pb-3 font-semibold">Time</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-700/50">
+        {% for log in recent_logs %}
+        <tr class="hover:bg-slate-800/40 transition-colors">
+          <td class="py-3 pr-4 font-semibold text-white text-xs">{{ log.admin.name if log.admin else 'System' }}</td>
+          <td class="py-3 pr-4">
+            <span class="px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] uppercase font-bold tracking-wider">
+              {{ log.action }}
+            </span>
+          </td>
+          <td class="py-3 pr-4 text-slate-400 text-xs">{{ (log.details or '')[:60] }}</td>
+          <td class="py-3 text-slate-500 whitespace-nowrap text-xs">{{ log.timestamp.strftime('%m/%d %H:%M') if log.timestamp }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="4" class="py-8 text-center text-slate-500">
+            No logs yet
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

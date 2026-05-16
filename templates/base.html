@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}SmartAssist{% endblock %} | AI Disaster Management</title>
+<meta name="description" content="{% block meta_desc %}SmartAssist - AI-Powered Disaster Management Support System{% endblock %}">
+
+<!-- Tailwind CSS via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          heading: ['Outfit', 'sans-serif'],
+        },
+        colors: {
+          glass: 'rgba(30, 41, 59, 0.7)',
+          dark: '#0f172a',
+        }
+      }
+    }
+  }
+</script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚨</text></svg>">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+{% block head %}{% endblock %}
+</head>
+<body class="bg-dark text-slate-100 min-h-screen overflow-x-hidden flex selection:bg-blue-500 selection:text-white">
+
+{% if current_user.is_authenticated %}
+<!-- Mobile Sidebar Overlay -->
+<div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 glass-panel border-r border-slate-800 transform -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out flex flex-col">
+  <!-- Logo -->
+  <div class="h-20 flex items-center px-6 border-b border-slate-800/50">
+    <a href="{{ url_for('main.landing') }}" class="flex items-center gap-3 group">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-xl shadow-lg shadow-blue-500/30 group-hover:shadow-blue-500/50 transition-all">🚨</div>
+      <div>
+        <h1 class="font-heading font-bold text-lg tracking-wide text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all">SmartAssist</h1>
+        <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">AI Platform</p>
+      </div>
+    </a>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-8 scrollbar-hide">
+    <!-- Main Section -->
+    <div>
+      <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Menu</p>
+      <div class="space-y-1">
+        <a href="{{ url_for('dashboard.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.endpoint == 'dashboard.index' %}bg-blue-500/10 text-blue-400{% else %}text-slate-300 hover:text-white hover:bg-slate-800/50{% endif %}">
+          <i class="ri-dashboard-3-line text-lg"></i> Dashboard
+        </a>
+        <a href="{{ url_for('chat.chatbot') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.endpoint == 'chat.chatbot' %}bg-blue-500/10 text-blue-400{% else %}text-slate-300 hover:text-white hover:bg-slate-800/50{% endif %}">
+          <i class="ri-robot-2-line text-lg"></i> AI Chatbot
+        </a>
+        <a href="{{ url_for('analytics.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if request.endpoint == 'analytics.index' %}bg-blue-500/10 text-blue-400{% else %}text-slate-300 hover:text-white hover:bg-slate-800/50{% endif %}">
+          <i class="ri-bar-chart-box-line text-lg"></i> Analytics
+        </a>
+      </div>
+    </div>
+
+    <!-- Admin Section -->
+    {% if current_user.is_admin() %}
+    <div>
+      <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Admin</p>
+      <div class="space-y-1">
+        <a href="{{ url_for('admin.index') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if 'admin.index' in request.endpoint %}bg-purple-500/10 text-purple-400{% else %}text-slate-300 hover:text-white hover:bg-slate-800/50{% endif %}">
+          <i class="ri-settings-4-line text-lg"></i> Overview
+        </a>
+        <a href="{{ url_for('admin.users') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if 'admin.users' in request.endpoint %}bg-purple-500/10 text-purple-400{% else %}text-slate-300 hover:text-white hover:bg-slate-800/50{% endif %}">
+          <i class="ri-team-line text-lg"></i> Users
+        </a>
+        <a href="{{ url_for('admin.reports') }}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors {% if 'admin.reports' in request.endpoint %}bg-purple-500/10 text-purple-400{% else %}text-slate-300 hover:text-white hover:bg-slate-800/50{% endif %}">
+          <i class="ri-alert-line text-lg"></i> Reports
+        </a>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Guides -->
+    <div>
+      <p class="px-3 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Guides</p>
+      <div class="space-y-1">
+        <a href="{{ url_for('dashboard.disaster_info', disaster_type='flood') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors">
+          <span class="text-blue-400">🌊</span> Flood
+        </a>
+        <a href="{{ url_for('dashboard.disaster_info', disaster_type='fire') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors">
+          <span class="text-orange-400">🔥</span> Fire
+        </a>
+        <a href="{{ url_for('dashboard.disaster_info', disaster_type='earthquake') }}" class="flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/50 transition-colors">
+          <span class="text-amber-600">🏚️</span> Earthquake
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- User Footer -->
+  <div class="p-4 border-t border-slate-800/50">
+    <div class="flex items-center gap-3 p-3 rounded-xl bg-slate-800/30 border border-slate-700/50">
+      <div class="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold shadow-md">
+        {{ current_user.name[0].upper() }}
+      </div>
+      <div class="flex-1 overflow-hidden">
+        <p class="text-sm font-medium text-white truncate">{{ current_user.name }}</p>
+        <p class="text-xs text-slate-400 capitalize">{{ current_user.role }}</p>
+      </div>
+      <a href="{{ url_for('auth.logout') }}" class="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-400/10 transition-colors" title="Logout">
+        <i class="ri-logout-box-r-line text-lg"></i>
+      </a>
+    </div>
+  </div>
+</aside>
+
+<!-- Main Wrapper -->
+<div class="flex-1 flex flex-col min-w-0 lg:pl-64 transition-all duration-300">
+  <!-- Top Header -->
+  <header class="h-20 glass-panel border-b border-slate-800 flex items-center justify-between px-4 sm:px-8 z-30 sticky top-0 rounded-none border-x-0 border-t-0">
+    <div class="flex items-center gap-4">
+      <button onclick="toggleSidebar()" class="lg:hidden text-slate-400 hover:text-white p-2 rounded-lg hover:bg-slate-800 transition-colors">
+        <i class="ri-menu-2-line text-2xl"></i>
+      </button>
+      <h2 class="text-xl sm:text-2xl font-heading font-semibold text-white tracking-tight">{% block page_title %}Dashboard{% endblock %}</h2>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold tracking-wide animate-pulse">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span> LIVE
+      </div>
+      {% block header_actions %}{% endblock %}
+    </div>
+  </header>
+
+  <!-- Page Content -->
+  <main class="flex-1 p-4 sm:p-8 overflow-y-auto">
+    <!-- Flash Messages -->
+    <div class="max-w-7xl mx-auto w-full mb-6">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="space-y-3">
+          {% for cat, msg in messages %}
+            {% set color = 'emerald' if cat == 'success' else 'red' if cat == 'danger' else 'amber' if cat == 'warning' else 'blue' %}
+            {% set icon = 'checkbox-circle' if cat == 'success' else 'error-warning' if cat == 'danger' else 'alert' if cat == 'warning' else 'information' %}
+            <div class="flex items-center gap-3 p-4 rounded-xl border border-{{ color }}-500/30 bg-{{ color }}-500/10 text-{{ color }}-200 animate-slide-up shadow-lg shadow-{{ color }}-500/5">
+              <i class="ri-{{ icon }}-fill text-2xl text-{{ color }}-400"></i>
+              <p class="font-medium text-sm">{{ msg }}</p>
+            </div>
+          {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <!-- Inner Content -->
+    <div class="max-w-7xl mx-auto w-full animate-slide-up" style="animation-delay: 0.1s;">
+      {% block content %}{% endblock %}
+    </div>
+  </main>
+</div>
+
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar.classList.contains('-translate-x-full')) {
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.remove('hidden');
+    } else {
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.add('hidden');
+    }
+  }
+</script>
+
+{% else %}
+  <!-- Public Pages wrapper -->
+  <div class="w-full">
+    {% block public_content %}{% endblock %}
+  </div>
+{% endif %}
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

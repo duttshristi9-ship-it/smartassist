@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Audit Logs{% endblock %}
+{% block page_title %}📝 Audit Logs{% endblock %}
+{% block header_actions %}
+<a href="{{ url_for('admin.index') }}" class="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors text-sm font-medium">
+  <i class="ri-arrow-left-line"></i> Back to Admin
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="glass-card overflow-hidden">
+  <div class="overflow-x-auto custom-scrollbar">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="border-b border-slate-700/50 bg-slate-800/30 text-xs uppercase tracking-wider text-slate-400 font-semibold">
+          <th class="p-4">ID</th>
+          <th class="p-4">Admin</th>
+          <th class="p-4">Action</th>
+          <th class="p-4">Details</th>
+          <th class="p-4">IP Address</th>
+          <th class="p-4">Time</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-700/50 text-sm">
+        {% for log in logs.items %}
+        <tr class="hover:bg-slate-800/40 transition-colors">
+          <td class="p-4 text-slate-400">#{{ log.id }}</td>
+          <td class="p-4 font-semibold text-white">{{ log.admin.name if log.admin else 'System' }}</td>
+          <td class="p-4">
+            <span class="px-2 py-1 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] uppercase font-bold tracking-wider">
+              {{ log.action }}
+            </span>
+          </td>
+          <td class="p-4 text-slate-400 max-w-sm truncate" title="{{ log.details }}">
+            {{ (log.details or '') }}
+          </td>
+          <td class="p-4 font-mono text-slate-500 text-xs">{{ log.ip_address or '—' }}</td>
+          <td class="p-4 text-slate-500 whitespace-nowrap">{{ log.timestamp.strftime('%m/%d %H:%M') if log.timestamp }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="p-8 text-center text-slate-400">
+            <i class="ri-file-list-3-line text-3xl mb-2 block"></i>
+            No audit logs found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if logs.pages > 1 %}
+<div class="flex justify-center gap-2 mt-8">
+  {% if logs.has_prev %}
+  <a href="?page={{ logs.prev_num }}" class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-blue-500 hover:border-blue-500 transition-all">
+    <i class="ri-arrow-left-s-line"></i>
+  </a>
+  {% endif %}
+  
+  {% for p in logs.iter_pages() %}
+    {% if p %}
+      {% if p == logs.page %}
+      <span class="w-10 h-10 rounded-xl bg-blue-500 text-white font-bold flex items-center justify-center shadow-lg shadow-blue-500/20">
+        {{ p }}
+      </span>
+      {% else %}
+      <a href="?page={{ p }}" class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-700 transition-all">
+        {{ p }}
+      </a>
+      {% endif %}
+    {% else %}
+      <span class="w-10 h-10 flex items-center justify-center text-slate-500">...</span>
+    {% endif %}
+  {% endfor %}
+
+  {% if logs.has_next %}
+  <a href="?page={{ logs.next_num }}" class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-blue-500 hover:border-blue-500 transition-all">
+    <i class="ri-arrow-right-s-line"></i>
+  </a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

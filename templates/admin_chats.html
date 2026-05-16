@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Chat Logs{% endblock %}
+{% block page_title %}💬 Chat Logs{% endblock %}
+{% block header_actions %}
+<a href="{{ url_for('admin.index') }}" class="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors text-sm font-medium">
+  <i class="ri-arrow-left-line"></i> Back to Admin
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="glass-card p-6 mb-6">
+  <form method="GET" class="flex flex-wrap gap-4 items-end">
+    <div>
+      <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Intent</label>
+      <select name="intent" class="glass-input rounded-xl text-sm min-w-[200px]">
+        <option value="">All Intents</option>
+        {% for i in intents %}
+        <option value="{{ i }}" {% if i == intent_filter %}selected{% endif %}>{{ i.replace('_',' ').title() }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div>
+      <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Severity</label>
+      <select name="severity" class="glass-input rounded-xl text-sm min-w-[160px]">
+        <option value="">All Severities</option>
+        {% for s in ['critical','high','medium','low'] %}
+        <option value="{{ s }}" {% if s == severity_filter %}selected{% endif %}>{{ s.title() }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="flex items-center gap-2">
+      <button type="submit" class="btn-vibrant px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-blue-500/20">
+        Filter
+      </button>
+      <a href="{{ url_for('admin.chats') }}" class="px-6 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors text-sm font-semibold">
+        Clear
+      </a>
+    </div>
+  </form>
+</div>
+
+<div class="glass-card overflow-hidden">
+  <div class="overflow-x-auto custom-scrollbar">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="border-b border-slate-700/50 bg-slate-800/30 text-xs uppercase tracking-wider text-slate-400 font-semibold">
+          <th class="p-4">ID</th>
+          <th class="p-4">User</th>
+          <th class="p-4">Message</th>
+          <th class="p-4">Intent</th>
+          <th class="p-4">Severity</th>
+          <th class="p-4">Confidence</th>
+          <th class="p-4">Time</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-700/50 text-sm">
+        {% for chat in chats.items %}
+        <tr class="hover:bg-slate-800/40 transition-colors">
+          <td class="p-4 text-slate-400">#{{ chat.id }}</td>
+          <td class="p-4 font-medium text-white">{{ chat.user.name if chat.user else 'Unknown' }}</td>
+          <td class="p-4 max-w-xs truncate" title="{{ chat.user_message }}">
+            {{ chat.user_message }}
+          </td>
+          <td class="p-4">
+            <span class="px-2 py-1 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] uppercase font-bold tracking-wider">
+              {{ chat.intent.replace('_',' ') }}
+            </span>
+          </td>
+          <td class="p-4">
+            {% if chat.severity == 'critical' %}
+              <span class="px-2 py-1 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] uppercase font-bold tracking-wider">Critical</span>
+            {% elif chat.severity == 'high' %}
+              <span class="px-2 py-1 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] uppercase font-bold tracking-wider">High</span>
+            {% elif chat.severity == 'medium' %}
+              <span class="px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] uppercase font-bold tracking-wider">Medium</span>
+            {% else %}
+              <span class="px-2 py-1 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] uppercase font-bold tracking-wider">Low</span>
+            {% endif %}
+          </td>
+          <td class="p-4 font-mono text-slate-400">{{ "%.0f"|format(chat.confidence*100) }}%</td>
+          <td class="p-4 text-slate-500 whitespace-nowrap">{{ chat.timestamp.strftime('%m/%d %H:%M') if chat.timestamp }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="7" class="p-8 text-center text-slate-400">
+            <i class="ri-inbox-line text-3xl mb-2 block"></i>
+            No chat logs found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if chats.pages > 1 %}
+<div class="flex justify-center gap-2 mt-8">
+  {% if chats.has_prev %}
+  <a href="?page={{ chats.prev_num }}" class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-blue-500 hover:border-blue-500 transition-all">
+    <i class="ri-arrow-left-s-line"></i>
+  </a>
+  {% endif %}
+  
+  {% for p in chats.iter_pages() %}
+    {% if p %}
+      {% if p == chats.page %}
+      <span class="w-10 h-10 rounded-xl bg-blue-500 text-white font-bold flex items-center justify-center shadow-lg shadow-blue-500/20">
+        {{ p }}
+      </span>
+      {% else %}
+      <a href="?page={{ p }}" class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-700 transition-all">
+        {{ p }}
+      </a>
+      {% endif %}
+    {% else %}
+      <span class="w-10 h-10 flex items-center justify-center text-slate-500">...</span>
+    {% endif %}
+  {% endfor %}
+
+  {% if chats.has_next %}
+  <a href="?page={{ chats.next_num }}" class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-blue-500 hover:border-blue-500 transition-all">
+    <i class="ri-arrow-right-s-line"></i>
+  </a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

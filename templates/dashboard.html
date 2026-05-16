@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard Overview{% endblock %}
+{% block header_actions %}
+<a href="{{ url_for('chat.chatbot') }}" class="btn-vibrant px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+  <i class="ri-robot-2-line"></i> Launch AI Chat
+</a>
+{% endblock %}
+
+{% block content %}
+<!-- Emergency Banner -->
+<div class="mb-8 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg shadow-red-500/5">
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 emergency-pulse">
+      <i class="ri-alarm-warning-fill text-xl"></i>
+    </div>
+    <div>
+      <h3 class="font-bold text-red-400">Active Emergency Lines</h3>
+      <p class="text-sm text-red-400/80 mt-1 flex flex-wrap gap-x-4 gap-y-1">
+        <span><i class="ri-phone-fill"></i> 112 (National)</span>
+        <span class="hidden sm:inline">|</span>
+        <span><i class="ri-hospital-fill"></i> 108 (Ambulance)</span>
+        <span class="hidden sm:inline">|</span>
+        <span><i class="ri-fire-fill"></i> 101 (Fire)</span>
+        <span class="hidden sm:inline">|</span>
+        <span><i class="ri-police-car-fill"></i> 100 (Police)</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <div class="glass-card p-6 border-blue-500/20">
+    <div class="flex justify-between items-start mb-4">
+      <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center text-blue-400 text-xl shadow-inner shadow-blue-500/20">
+        <i class="ri-chat-3-line"></i>
+      </div>
+    </div>
+    <h3 class="text-3xl font-bold text-white mb-1 font-heading">{{ total_chats }}</h3>
+    <p class="text-slate-400 text-sm font-medium">Total AI Queries</p>
+  </div>
+  
+  <div class="glass-card p-6 border-red-500/20">
+    <div class="flex justify-between items-start mb-4">
+      <div class="w-12 h-12 rounded-xl bg-red-500/20 flex items-center justify-center text-red-400 text-xl shadow-inner shadow-red-500/20">
+        <i class="ri-alarm-warning-line"></i>
+      </div>
+    </div>
+    <h3 class="text-3xl font-bold text-red-400 mb-1 font-heading">{{ total_reports }}</h3>
+    <p class="text-slate-400 text-sm font-medium">Emergency Reports</p>
+  </div>
+  
+  <div class="glass-card p-6 border-amber-500/20">
+    <div class="flex justify-between items-start mb-4">
+      <div class="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400 text-xl shadow-inner shadow-amber-500/20">
+        <i class="ri-alert-line"></i>
+      </div>
+    </div>
+    <h3 class="text-3xl font-bold text-amber-400 mb-1 font-heading">{{ open_reports }}</h3>
+    <p class="text-slate-400 text-sm font-medium">Open Reports</p>
+  </div>
+  
+  <div class="glass-card p-6 border-emerald-500/20">
+    <div class="flex justify-between items-start mb-4">
+      <div class="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xl shadow-inner shadow-emerald-500/20">
+        <i class="ri-shield-check-line"></i>
+      </div>
+    </div>
+    <h3 class="text-3xl font-bold text-emerald-400 mb-1 font-heading">24/7</h3>
+    <p class="text-slate-400 text-sm font-medium">System Status</p>
+  </div>
+</div>
+
+<!-- Modules & Recent Activity Layout -->
+<div class="grid lg:grid-cols-3 gap-8">
+  
+  <!-- Left Column: Modules & Prompts -->
+  <div class="lg:col-span-2 space-y-8">
+    
+    <!-- Disaster Modules -->
+    <div>
+      <h2 class="text-xl font-bold text-white mb-4 font-heading flex items-center gap-2">
+        <i class="ri-global-line text-blue-400"></i> Core Disaster Modules
+      </h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for d in disaster_types %}
+        <a href="{{ url_for('dashboard.disaster_info', disaster_type=d.id) }}" class="glass-card p-5 group hover:bg-slate-800/80 flex flex-col justify-between">
+          <div>
+            <div class="w-10 h-10 rounded-lg flex items-center justify-center text-xl mb-3 border border-slate-700 bg-slate-800/50 shadow-inner group-hover:scale-110 transition-transform">
+              {{ d.icon }}
+            </div>
+            <h4 class="font-bold text-white mb-2">{{ d.name }}</h4>
+            <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">{{ d.desc }}</p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-700/50 flex items-center justify-between text-xs font-semibold text-slate-400 group-hover:text-blue-400 transition-colors">
+            Access Guide <i class="ri-arrow-right-line"></i>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Quick Prompts -->
+    <div class="glass-card p-6">
+      <h2 class="text-xl font-bold text-white mb-4 font-heading flex items-center gap-2">
+        <i class="ri-flashlight-line text-amber-400"></i> Quick Emergency Prompts
+      </h2>
+      <div class="grid sm:grid-cols-2 gap-3">
+        {% set quick = [
+          ('🌊 Flood near my location', 'There is flooding near my house, what should I do?'),
+          ('🔥 Fire escape instructions', 'Fire broke out in my building, how to escape?'),
+          ('🏚️ Active Earthquake response', 'Earthquake is happening right now, what do I do?'),
+          ('🏥 Request Medical help', 'Someone is injured and needs medical help'),
+          ('📞 Show all Emergency contacts', 'Give me all emergency contact numbers'),
+          ('🏠 Find nearest shelter', 'I need to find emergency shelter near me'),
+        ] %}
+        {% for label, prompt in quick %}
+        <a href="{{ url_for('chat.chatbot') }}?q={{ prompt | urlencode }}" class="flex items-center justify-between p-3 rounded-xl bg-slate-800/50 border border-slate-700 hover:border-blue-500/50 hover:bg-blue-500/10 text-slate-300 hover:text-white transition-all group text-sm">
+          <span class="truncate">{{ label }}</span>
+          <i class="ri-arrow-right-line text-slate-500 group-hover:text-blue-400 transform group-hover:translate-x-1 transition-all"></i>
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- Right Column: Recent Activity -->
+  <div class="lg:col-span-1">
+    <div class="glass-card p-6 h-full flex flex-col">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-bold text-white font-heading flex items-center gap-2">
+          <i class="ri-history-line text-purple-400"></i> Activity Log
+        </h2>
+        <a href="{{ url_for('chat.chatbot') }}" class="text-xs font-semibold text-blue-400 hover:text-blue-300">View All</a>
+      </div>
+      
+      <div class="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
+        {% if recent_chats %}
+          {% for chat in recent_chats %}
+          <div class="p-4 rounded-xl bg-slate-800/40 border border-slate-700 hover:border-slate-600 transition-colors">
+            <p class="text-sm text-white mb-3 leading-relaxed">"{{ chat.user_message[:65] }}{{ '...' if chat.user_message|length > 65 }}"</p>
+            <div class="flex items-center justify-between text-xs">
+              <div class="flex items-center gap-2">
+                {% if chat.severity == 'critical' %}
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500/20 text-red-400 border border-red-500/30 uppercase tracking-wider">Critical</span>
+                {% elif chat.severity == 'high' %}
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-orange-500/20 text-orange-400 border border-orange-500/30 uppercase tracking-wider">High</span>
+                {% elif chat.severity == 'medium' %}
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase tracking-wider">Medium</span>
+                {% else %}
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">Low</span>
+                {% endif %}
+                <span class="text-slate-400 capitalize">{{ chat.intent.replace('_',' ') }}</span>
+              </div>
+              <span class="text-slate-500 font-mono">{{ chat.timestamp.strftime('%H:%M') if chat.timestamp else '' }}</span>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="h-full flex flex-col items-center justify-center text-center py-12">
+            <div class="w-16 h-16 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 text-2xl mb-4">
+              <i class="ri-chat-3-line"></i>
+            </div>
+            <p class="text-slate-400 text-sm mb-4">No activity logged yet.</p>
+            <a href="{{ url_for('chat.chatbot') }}" class="btn-vibrant px-4 py-2 rounded-lg text-xs font-semibold">Start Query</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

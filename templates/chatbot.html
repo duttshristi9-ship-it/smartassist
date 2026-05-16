@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+{% block title %}AI Chatbot{% endblock %}
+{% block page_title %}AI Emergency Chatbot{% endblock %}
+
+{% block content %}
+<!-- Escalation Alert Banner -->
+<div id="escalationBanner" class="fixed top-24 right-6 z-50 max-w-sm w-full hidden animate-slide-up">
+  <div class="glass-card bg-red-500/10 border-red-500/30 p-4 shadow-2xl shadow-red-500/20 flex items-start gap-4">
+    <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center text-red-400 emergency-pulse shrink-0">
+      <i class="ri-alarm-warning-fill text-xl"></i>
+    </div>
+    <div class="flex-1">
+      <h4 class="font-bold text-red-400 text-sm mb-1 uppercase tracking-wider">Critical Emergency</h4>
+      <p class="text-white text-sm">
+        <span class="escalation-type capitalize">Emergency</span> detected! Call <strong class="text-red-400">112</strong> immediately.
+      </p>
+    </div>
+    <button onclick="closeSOS()" class="text-slate-400 hover:text-white transition-colors">
+      <i class="ri-close-line text-xl"></i>
+    </button>
+  </div>
+</div>
+
+<div class="flex flex-col lg:flex-row gap-6 h-[calc(100vh-140px)] -mx-4 sm:mx-0">
+  
+  <!-- Chat Sidebar -->
+  <div class="w-full lg:w-80 flex flex-col gap-6 shrink-0 h-full">
+    
+    <!-- AI Status -->
+    <div class="glass-card p-6 text-center">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4">AI Status</p>
+      <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br from-blue-500/20 to-purple-600/20 border border-blue-500/30 flex items-center justify-center text-4xl shadow-lg shadow-blue-500/10 mb-4 float-anim">
+        🤖
+      </div>
+      <h3 class="font-bold text-white text-lg">SmartAssist Ready</h3>
+      <div class="inline-flex items-center gap-2 px-3 py-1 mt-3 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-semibold">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Online
+      </div>
+    </div>
+
+    <!-- Quick Prompts -->
+    <div class="glass-card p-4 flex flex-col flex-1 min-h-0">
+      <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-4 px-2">Quick Prompts</p>
+      <div class="space-y-2 overflow-y-auto custom-scrollbar pr-2">
+        {% for q in ['🌊 Flood help','🔥 Fire escape','🏚️ Earthquake','🏥 Medical emergency','📞 Emergency numbers','🏠 Find shelter'] %}
+        <button onclick="useQuickPrompt('{{ q[2:] }}')" class="w-full text-left px-4 py-3 rounded-xl bg-slate-800/40 border border-slate-700/50 hover:bg-blue-500/10 hover:border-blue-500/30 text-slate-300 hover:text-white text-sm transition-all flex items-center justify-between group">
+          <span>{{ q }}</span>
+          <i class="ri-arrow-right-line text-slate-500 group-hover:text-blue-400 transform group-hover:translate-x-1 transition-all"></i>
+        </button>
+        {% endfor %}
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Main Chat Area -->
+  <div class="flex-1 glass-card flex flex-col overflow-hidden relative">
+    
+    <!-- Chat Header -->
+    <div class="h-16 border-b border-slate-700/50 flex items-center justify-between px-6 shrink-0 bg-slate-800/20">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 flex items-center justify-center">
+          <i class="ri-chat-3-line"></i>
+        </div>
+        <h3 class="font-bold text-white">Emergency Assistant</h3>
+      </div>
+      <button onclick="triggerSOS()" class="btn-danger-vibrant px-4 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wide flex items-center gap-2 emergency-pulse">
+        <i class="ri-alarm-warning-fill"></i> SOS
+      </button>
+    </div>
+
+    <!-- Messages Area -->
+    <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar" id="messagesArea">
+      
+      <!-- Welcome Message -->
+      <div class="flex gap-4">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-lg shadow-lg shrink-0">
+          🤖
+        </div>
+        <div class="flex flex-col gap-1 max-w-[85%]">
+          <div class="px-5 py-4 rounded-2xl rounded-tl-sm bot-msg text-sm leading-relaxed text-slate-200">
+            <strong class="text-white text-base block mb-3">👋 Hello, {{ current_user.name }}! I'm SmartAssist AI.</strong>
+            I'm here to help you during emergencies and disasters. I can assist with:
+            <ul class="mt-3 space-y-2 ml-1">
+              <li class="flex items-center gap-2"><span class="text-blue-400">🌊</span> Flood emergency guidance</li>
+              <li class="flex items-center gap-2"><span class="text-orange-400">🔥</span> Fire safety and evacuation</li>
+              <li class="flex items-center gap-2"><span class="text-amber-600">🏚️</span> Earthquake response</li>
+              <li class="flex items-center gap-2"><span class="text-emerald-400">🏥</span> Medical emergency support</li>
+              <li class="flex items-center gap-2"><span class="text-indigo-400">🏠</span> Shelter finding</li>
+              <li class="flex items-center gap-2"><span class="text-red-400">📞</span> Emergency contacts</li>
+            </ul>
+            <p class="mt-4 pt-3 border-t border-slate-700/50 text-slate-400">Please describe your situation and I'll provide immediate guidance.</p>
+          </div>
+          <div class="flex items-center gap-2 ml-1">
+            <span class="text-[10px] text-slate-500 font-mono">now</span>
+            <span class="px-2 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 text-[10px] uppercase font-bold tracking-wider">System</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Historical Messages -->
+      {% for msg in history %}
+      <div class="flex gap-4 justify-end">
+        <div class="flex flex-col items-end gap-1 max-w-[85%]">
+          <div class="px-5 py-3 rounded-2xl rounded-tr-sm user-msg text-sm leading-relaxed shadow-lg">
+            {{ msg.user_message }}
+          </div>
+          <div class="flex items-center gap-2 mr-1 text-[10px] text-slate-500 font-mono">
+            {{ msg.timestamp.strftime('%H:%M') if msg.timestamp }}
+          </div>
+        </div>
+        <div class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-lg shrink-0">
+          👤
+        </div>
+      </div>
+
+      <div class="flex gap-4">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-lg shadow-lg shrink-0">
+          🤖
+        </div>
+        <div class="flex flex-col gap-1 max-w-[85%]">
+          <div class="px-5 py-4 rounded-2xl rounded-tl-sm bot-msg text-sm leading-relaxed text-slate-200">
+            {{ msg.bot_response }}
+          </div>
+          <div class="flex items-center flex-wrap gap-2 ml-1">
+            <span class="text-[10px] text-slate-500 font-mono">{{ msg.timestamp.strftime('%H:%M') if msg.timestamp }}</span>
+            <span class="px-2 py-0.5 rounded bg-purple-500/10 border border-purple-500/20 text-purple-400 text-[10px] uppercase font-bold tracking-wider">{{ msg.intent.replace('_',' ') }}</span>
+            {% if msg.severity == 'critical' %}
+              <span class="px-2 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] uppercase font-bold tracking-wider">Critical</span>
+            {% elif msg.severity == 'high' %}
+              <span class="px-2 py-0.5 rounded bg-orange-500/10 border border-orange-500/20 text-orange-400 text-[10px] uppercase font-bold tracking-wider">High</span>
+            {% elif msg.severity == 'medium' %}
+              <span class="px-2 py-0.5 rounded bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[10px] uppercase font-bold tracking-wider">Medium</span>
+            {% else %}
+              <span class="px-2 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[10px] uppercase font-bold tracking-wider">Low</span>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      <!-- Typing Indicator -->
+      <div id="typingIndicator" class="flex gap-4 hidden">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-lg shadow-lg shrink-0">
+          🤖
+        </div>
+        <div class="flex flex-col gap-1">
+          <div class="px-5 py-4 rounded-2xl rounded-tl-sm bot-msg flex items-center gap-1">
+            <div class="typing-indicator">
+              <span></span><span></span><span></span>
+            </div>
+          </div>
+          <span class="text-[10px] text-slate-500 ml-1">AI is analyzing...</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Input Box -->
+    <div class="p-4 border-t border-slate-700/50 bg-slate-800/30 shrink-0">
+      <form id="chatForm" class="relative">
+        <div class="flex items-end gap-3 bg-slate-900/50 border border-slate-700 focus-within:border-blue-500/50 focus-within:ring-2 focus-within:ring-blue-500/20 rounded-2xl p-2 transition-all">
+          <button type="button" onclick="clearChat()" class="p-3 text-slate-400 hover:text-red-400 transition-colors" title="Clear Chat">
+            <i class="ri-delete-bin-line text-lg"></i>
+          </button>
+          <textarea id="chatInput" rows="1" class="flex-1 bg-transparent border-none focus:ring-0 text-white resize-none max-h-32 min-h-[44px] py-3 custom-scrollbar text-sm" placeholder="Describe your emergency... (e.g. 'There is a flood near my house')" maxlength="1000"></textarea>
+          <button type="submit" id="sendBtn" class="w-11 h-11 rounded-xl bg-gradient-to-br from-blue-500 to-purple-600 text-white flex items-center justify-center shadow-lg hover:shadow-blue-500/30 transition-all transform hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed">
+            <i class="ri-send-plane-fill text-lg"></i>
+          </button>
+        </div>
+        <div class="flex justify-between items-center mt-2 px-2">
+          <span class="text-[10px] text-slate-500 font-medium">Press <kbd class="bg-slate-800 px-1 py-0.5 rounded border border-slate-700">Enter</kbd> to send · <kbd class="bg-slate-800 px-1 py-0.5 rounded border border-slate-700">Shift+Enter</kbd> for new line</span>
+        </div>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- SOS Modal -->
+<div id="sosModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-[9999] hidden flex-col items-center justify-center p-4">
+  <div class="glass-card max-w-lg w-full p-8 sm:p-12 text-center border-2 border-red-500 animate-slide-up shadow-2xl shadow-red-500/20">
+    <div class="w-24 h-24 mx-auto rounded-full bg-red-500/20 flex items-center justify-center text-5xl mb-6 emergency-pulse text-red-500 border border-red-500/50">
+      <i class="ri-alarm-warning-fill"></i>
+    </div>
+    <h2 class="text-3xl font-heading font-bold text-red-500 mb-2">EMERGENCY SOS</h2>
+    <p class="text-slate-300 mb-8 font-medium">Call these numbers IMMEDIATELY:</p>
+    
+    <div class="grid grid-cols-2 gap-4 mb-8">
+      <div class="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 transition-colors">
+        <div class="text-3xl font-black text-red-500 tracking-wider">112</div>
+        <div class="text-xs text-red-400/80 uppercase font-bold mt-1">National</div>
+      </div>
+      <div class="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 transition-colors">
+        <div class="text-3xl font-black text-red-500 tracking-wider">108</div>
+        <div class="text-xs text-red-400/80 uppercase font-bold mt-1">Ambulance</div>
+      </div>
+      <div class="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 transition-colors">
+        <div class="text-3xl font-black text-red-500 tracking-wider">101</div>
+        <div class="text-xs text-red-400/80 uppercase font-bold mt-1">Fire</div>
+      </div>
+      <div class="p-4 rounded-2xl bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 transition-colors">
+        <div class="text-3xl font-black text-red-500 tracking-wider">100</div>
+        <div class="text-xs text-red-400/80 uppercase font-bold mt-1">Police</div>
+      </div>
+    </div>
+    
+    <button onclick="closeSOS()" class="w-full px-6 py-3 rounded-xl border border-slate-600 text-slate-300 hover:text-white hover:bg-slate-800 transition-all font-semibold">
+      I Understand, Close Menu
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+<script>
+// Pre-fill from URL query param
+const urlParams = new URLSearchParams(window.location.search);
+const q = urlParams.get('q');
+if (q) { document.getElementById('chatInput').value = q; }
+
+// Auto-resize textarea
+const tx = document.getElementById('chatInput');
+tx.addEventListener('input', OnInput, false);
+function OnInput() {
+  this.style.height = 'auto';
+  this.style.height = (this.scrollHeight) + 'px';
+}
+</script>
+{% endblock %}

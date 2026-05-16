@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+{% block title %}Manage Users{% endblock %}
+{% block page_title %}👥 Manage Users{% endblock %}
+{% block header_actions %}
+<a href="{{ url_for('admin.index') }}" class="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors text-sm font-medium">
+  <i class="ri-arrow-left-line"></i> Back to Admin
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="glass-card p-6 mb-6">
+  <form method="GET" class="flex flex-wrap gap-4 items-center">
+    <div class="flex-1 relative min-w-[250px]">
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+        <i class="ri-search-line"></i>
+      </div>
+      <input type="text" name="search" class="glass-input block w-full pl-10 rounded-xl py-2.5 text-sm" placeholder="Search by name or email..." value="{{ search }}">
+    </div>
+    <div class="flex items-center gap-2">
+      <button type="submit" class="btn-vibrant px-6 py-2.5 rounded-xl text-sm font-semibold shadow-lg shadow-blue-500/20">
+        Search
+      </button>
+      {% if search %}
+      <a href="{{ url_for('admin.users') }}" class="px-6 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors text-sm font-semibold">
+        Clear
+      </a>
+      {% endif %}
+    </div>
+  </form>
+</div>
+
+<div class="glass-card overflow-hidden">
+  <div class="overflow-x-auto custom-scrollbar">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="border-b border-slate-700/50 bg-slate-800/30 text-xs uppercase tracking-wider text-slate-400 font-semibold">
+          <th class="p-4">#</th>
+          <th class="p-4">Name</th>
+          <th class="p-4">Email</th>
+          <th class="p-4">Role</th>
+          <th class="p-4">Status</th>
+          <th class="p-4">Joined</th>
+          <th class="p-4">Chats</th>
+          <th class="p-4 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-slate-700/50 text-sm">
+        {% for user in users.items %}
+        <tr class="hover:bg-slate-800/40 transition-colors">
+          <td class="p-4 text-slate-400">{{ user.id }}</td>
+          <td class="p-4 font-medium text-white flex items-center gap-2">
+            <div class="w-6 h-6 rounded bg-blue-500/20 text-blue-400 flex items-center justify-center text-xs">
+              {{ user.name[0].upper() }}
+            </div>
+            {{ user.name }}
+          </td>
+          <td class="p-4 text-slate-400">{{ user.email }}</td>
+          <td class="p-4">
+            <span class="px-2 py-1 rounded border text-[10px] uppercase font-bold tracking-wider
+              {% if user.role == 'admin' %}bg-purple-500/10 border-purple-500/20 text-purple-400
+              {% else %}bg-blue-500/10 border-blue-500/20 text-blue-400{% endif %}">
+              {{ user.role }}
+            </span>
+          </td>
+          <td class="p-4">
+            <span id="status-{{ user.id }}" class="px-2 py-1 rounded border text-[10px] uppercase font-bold tracking-wider
+              {% if user.is_active %}bg-emerald-500/10 border-emerald-500/20 text-emerald-400
+              {% else %}bg-slate-500/10 border-slate-500/20 text-slate-400{% endif %}">
+              {{ 'Active' if user.is_active else 'Inactive' }}
+            </span>
+          </td>
+          <td class="p-4 text-slate-500 whitespace-nowrap">{{ user.created_at.strftime('%Y-%m-%d') if user.created_at }}</td>
+          <td class="p-4 text-slate-400">{{ user.chat_history.count() }}</td>
+          <td class="p-4 text-right">
+            {% if user.id != current_user.id %}
+            <div class="flex items-center justify-end gap-2">
+              <button onclick="toggleUser({{ user.id }})" id="toggle-{{ user.id }}" class="px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors text-xs font-semibold">
+                {{ 'Deactivate' if user.is_active else 'Activate' }}
+              </button>
+              <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" class="inline" onsubmit="return confirmDelete('Delete user {{ user.email }}?')">
+                <button type="submit" class="w-8 h-8 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 hover:bg-red-500/20 transition-colors flex items-center justify-center">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </form>
+            </div>
+            {% else %}
+            <span class="text-xs text-slate-500 italic">Current Session</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="8" class="p-8 text-center text-slate-400">
+            <i class="ri-user-unfollow-line text-3xl mb-2 block"></i>
+            No users found
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% if users.pages > 1 %}
+<div class="flex justify-center gap-2 mt-8">
+  {% if users.has_prev %}
+  <a href="?page={{ users.prev_num }}&search={{ search }}" class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-blue-500 hover:border-blue-500 transition-all">
+    <i class="ri-arrow-left-s-line"></i>
+  </a>
+  {% endif %}
+  
+  {% for p in users.iter_pages() %}
+    {% if p %}
+      {% if p == users.page %}
+      <span class="w-10 h-10 rounded-xl bg-blue-500 text-white font-bold flex items-center justify-center shadow-lg shadow-blue-500/20">
+        {{ p }}
+      </span>
+      {% else %}
+      <a href="?page={{ p }}&search={{ search }}" class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-slate-700 transition-all">
+        {{ p }}
+      </a>
+      {% endif %}
+    {% else %}
+      <span class="w-10 h-10 flex items-center justify-center text-slate-500">...</span>
+    {% endif %}
+  {% endfor %}
+
+  {% if users.has_next %}
+  <a href="?page={{ users.next_num }}&search={{ search }}" class="w-10 h-10 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 hover:text-white hover:bg-blue-500 hover:border-blue-500 transition-all">
+    <i class="ri-arrow-right-s-line"></i>
+  </a>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}
