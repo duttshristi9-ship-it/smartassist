@@ -1,8 +1,8 @@
-# SmartAssist: AI-Powered Disaster Management Support 🌊🔥🏚️
+# SmartAssist: AI-Powered Disaster Management Support 
 
 SmartAssist is a complete Python-centric disaster management platform utilizing advanced NLP, ML feedback loops, and real-time WebSockets to provide immediate emergency guidance, rescue coordination, and shelter routing.
 
-## 🚀 Features
+## Features
 
 - **Advanced NLP Chatbot**: Powered by `spaCy` and `scikit-learn` to handle emergency intents (flood, fire, earthquake, medical, etc.) with confidence scoring and severity classification.
 - **ML Feedback Response Engine**: Adaptive AI response engine using `SGDRegressor` to learn and rank the best responses based on user feedback.
@@ -13,7 +13,7 @@ SmartAssist is a complete Python-centric disaster management platform utilizing 
 - **Dynamic AI Training Admin**: Custom Admin dashboard for visualizing chatbot intent distributions and manually retraining the NLP models on-the-fly.
 - **Vibrant UI**: Modern Glassmorphism aesthetic, rich dark mode, and dynamic micro-animations.
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 - **Backend**: Python 3.10, Flask, Flask-RESTful, Flask-SocketIO
 - **AI/ML**: spaCy (NER & NLP), scikit-learn (TF-IDF, Naive Bayes, SGDRegressor)
@@ -22,7 +22,7 @@ SmartAssist is a complete Python-centric disaster management platform utilizing 
 - **Deployment**: Docker, docker-compose, Gunicorn
 - **Frontend**: HTML5, CSS3 (Vanilla Glassmorphism), JS, Leaflet.js
 
-## 📦 Quick Start Deployment (Docker)
+## Quick Start Deployment (Docker)
 
 1. Clone the repository and navigate to the project directory:
    ```bash
@@ -49,7 +49,7 @@ SmartAssist is a complete Python-centric disaster management platform utilizing 
    - **User Portal**: `http://localhost:5000`
    - **Admin Panel**: `http://localhost:5000/admin` (admin@smartassist.com / Admin@123)
 
-## 🧪 Testing
+## Testing
 
 Run the automated test suite with `pytest`:
 
@@ -61,7 +61,7 @@ docker-compose exec web bash
 pytest tests/
 ```
 
-## 🏗️ Architecture
+## Architecture
 
 - `app.py`: Application factory and socket initialization.
 - `ai_engine/`: Contains the `intent_classifier.py` (NLP) and `response_engine.py` (ML).
