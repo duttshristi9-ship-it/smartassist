@@ -103,6 +103,25 @@ def register():
 @login_required
 def logout():
     """User logout"""
+    from flask import make_response, current_app
+    import os
+    
     logout_user()
+    session.clear()
+    
+    response = make_response(redirect(url_for('main.landing')))
+    
+    # Determine security settings dynamically based on env (HTTP vs HTTPS iframe support)
+    is_prod = os.environ.get('FLASK_ENV') == 'production' or current_app.config.get('ENV') == 'production'
+    
+    cookie_options = {
+        'path': '/',
+        'secure': True if is_prod else False,
+        'samesite': 'None' if is_prod else 'Lax'
+    }
+    
+    response.delete_cookie('session', **cookie_options)
+    response.delete_cookie('remember_token', **cookie_options)
+    
     flash('You have been logged out successfully.', 'info')
-    return redirect(url_for('main.landing'))
+    return response
