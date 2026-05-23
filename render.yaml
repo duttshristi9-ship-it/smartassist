@@ -14,6 +14,6 @@ services:
       - key: REDIS_URL
         value: ""
 
-  - type: psql
+  - type: database
     name: smartassist-db
     plan: free
