@@ -47,7 +47,8 @@
             </div>
             <input id="name" name="name" type="text" autocomplete="name" required 
                    class="glass-input block w-full pl-10 sm:text-sm rounded-xl py-3" 
-                   placeholder="John Doe">
+                   placeholder="John Doe"
+                   value="{{ name if name else '' }}">
           </div>
         </div>
 
@@ -59,7 +60,8 @@
             </div>
             <input id="email" name="email" type="email" autocomplete="email" required 
                    class="glass-input block w-full pl-10 sm:text-sm rounded-xl py-3" 
-                   placeholder="you@example.com">
+                   placeholder="you@example.com"
+                   value="{{ email if email else '' }}">
           </div>
         </div>
 
@@ -74,6 +76,18 @@
                    placeholder="••••••••">
           </div>
           <p class="mt-2 text-xs text-slate-500">Must be at least 8 characters long.</p>
+        </div>
+
+        <div>
+          <label for="confirm_password" class="block text-sm font-medium text-slate-300 mb-2">Confirm Password</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+              <i class="ri-lock-line"></i>
+            </div>
+            <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" required minlength="8"
+                   class="glass-input block w-full pl-10 sm:text-sm rounded-xl py-3" 
+                   placeholder="••••••••">
+          </div>
         </div>
 
         <div class="pt-2">
