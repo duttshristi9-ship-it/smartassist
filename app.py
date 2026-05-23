@@ -29,6 +29,10 @@ def create_app(config_name: str = 'default') -> Flask:
     # Load configuration
     app.config.from_object(config[config_name])
     
+    # Apply ProxyFix to support SSL termination behind reverse proxies (like Hugging Face)
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
+    
     # Configure logging
     logging.basicConfig(
         level=logging.INFO,

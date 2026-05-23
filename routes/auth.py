@@ -22,7 +22,7 @@ def login():
     if request.method == 'POST':
         email = request.form.get('email', '').strip().lower()
         password = request.form.get('password', '')
-        remember = request.form.get('remember', False)
+        remember = request.form.get('remember-me', False)
         
         # Validate inputs
         if not email or not password:
