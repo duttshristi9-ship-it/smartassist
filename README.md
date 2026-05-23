@@ -1,13 +1,3 @@
----
-title: SmartAssist
-emoji: 🚨
-colorFrom: purple
-colorTo: indigo
-sdk: docker
-app_port: 5000
-pinned: false
----
-
 # SmartAssist: AI-Powered Disaster Management Support 
 
 SmartAssist is a complete Python-centric disaster management platform utilizing advanced NLP, ML feedback loops, and real-time WebSockets to provide immediate emergency guidance, rescue coordination, and shelter routing.
