@@ -14,6 +14,6 @@ services:
       - key: REDIS_URL
         value: ""
 
-  - type: database
-    name: smartassist-db
+databases:
+  - name: smartassist-db
     plan: free
