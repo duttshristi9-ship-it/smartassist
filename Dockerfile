@@ -31,4 +31,4 @@ COPY . /app/
 EXPOSE 5000
 
 # Command to run Gunicorn with eventlet for SocketIO
-CMD ["gunicorn", "-k", "eventlet", "-w", "1", "-b", "0.0.0.0:5000", "app:app"]
+CMD ["gunicorn", "-k", "eventlet", "-w", "1", "-b", "0.0.0.0:5000", "wsgi:app"]
