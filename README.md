@@ -1,5 +1,9 @@
 # SmartAssist: AI-Powered Disaster Management Support 
 
+[![Hugging Face Spaces](https://img.shields.io/badge/%F0%9F%A5%97%20Hugging%20Face-Spaces-blue)](https://huggingface.co/spaces/duttshristi9-ship-it/smartassist)
+
+🚀 **Live Demo on Hugging Face Spaces**: **[https://huggingface.co/spaces/duttshristi9-ship-it/smartassist](https://huggingface.co/spaces/duttshristi9-ship-it/smartassist)**
+
 SmartAssist is a complete Python-centric disaster management platform utilizing advanced NLP, ML feedback loops, and real-time WebSockets to provide immediate emergency guidance, rescue coordination, and shelter routing.
 
 ## Features
