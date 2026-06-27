@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+{% block title %}SmartAssist | AI-Powered Disaster Management{% endblock %}
+
+{% block public_content %}
+<!-- Navbar -->
+<nav class="fixed w-full z-50 glass-panel border-b border-slate-800/50 rounded-none top-0">
+  <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+    <a href="{{ url_for('main.landing') }}" class="flex items-center gap-3 group">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600 flex items-center justify-center text-xl shadow-lg shadow-slate-500/20 group-hover:shadow-slate-500/30 transition-all"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="w-full h-full p-1.5 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8.5 4.5C8.5 4.5 5 8.5 5 12C5 15.5 8.5 19.5 8.5 19.5" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M15.5 19.5C15.5 19.5 19 15.5 19 12C19 8.5 15.5 4.5 15.5 4.5" stroke="#9CA3AF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8.5 12C10.5 10 13.5 10 15.5 12" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
+      </svg></div>
+      <h1 class="font-heading font-bold text-2xl tracking-wide text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-blue-400 group-hover:to-purple-400 transition-all">SmartAssist</h1>
+    </a>
+    <div class="flex items-center gap-4">
+      {% if current_user.is_authenticated %}
+      <a href="{{ url_for('dashboard.index') }}" class="text-sm font-medium text-slate-300 hover:text-white transition-colors hidden sm:block">Dashboard</a>
+      <a href="{{ url_for('chat.chatbot') }}" class="bg-slate-100 text-slate-900 hover:bg-white hover:scale-105 transition-all shadow-[0_0_15px_rgba(255,255,255,0.3)] px-6 py-2 rounded-full text-sm font-semibold flex items-center gap-2">
+        <i class="ri-robot-2-line"></i> AI Chat
+      </a>
+      {% else %}
+      <a href="{{ url_for('auth.login') }}" class="text-sm font-medium text-slate-300 hover:text-white transition-colors hidden sm:block">Sign In</a>
+      <a href="{{ url_for('auth.register') }}" class="bg-slate-100 text-slate-900 hover:bg-white hover:scale-105 transition-all shadow-[0_0_15px_rgba(255,255,255,0.3)] px-6 py-2.5 rounded-full text-sm font-semibold flex items-center gap-2">
+        Get Started <i class="ri-arrow-right-line"></i>
+      </a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden min-h-screen flex items-center justify-center">
+  <!-- Glowing Background Orbs -->
+  <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-slate-400/10 rounded-full blur-[120px] -z-10 pointer-events-none"></div>
+  <div class="absolute top-1/4 left-1/4 w-[400px] h-[400px] bg-slate-500/10 rounded-full blur-[100px] -z-10 pointer-events-none float-anim"></div>
+  <div class="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-red-500/10 rounded-full blur-[100px] -z-10 pointer-events-none float-anim" style="animation-delay: 2s;"></div>
+
+  <div class="max-w-7xl mx-auto px-6 relative z-10 text-center flex flex-col items-center">
+    <div class="animate-slide-up inline-flex items-center gap-2 px-4 py-2 rounded-full glass-panel border-slate-500/30 text-slate-300 text-sm font-semibold tracking-wide mb-8">
+      <span class="w-2 h-2 rounded-full bg-slate-500 animate-pulse"></span> AI-Powered Emergency Response
+    </div>
+    
+    <div class="animate-slide-up mb-6 float-anim" style="animation-delay: 0.1s;">
+      <div class="w-24 h-24 mx-auto rounded-3xl bg-gradient-to-br from-slate-600 to-slate-800 p-[2px] shadow-2xl shadow-slate-600/20">
+        <div class="w-full h-full bg-slate-900 rounded-[22px] flex items-center justify-center text-5xl">
+          🤖
+        </div>
+      </div>
+    </div>
+    
+    <h1 class="animate-slide-up font-heading text-5xl lg:text-7xl font-extrabold text-white tracking-tight leading-tight mb-6 max-w-4xl" style="animation-delay: 0.2s;">
+      Smart<span class="text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-slate-400">Assist</span><br>
+      Disaster Response Platform
+    </h1>
+    
+    <p class="animate-slide-up text-lg lg:text-xl text-slate-400 max-w-2xl mx-auto mb-12 leading-relaxed" style="animation-delay: 0.3s;">
+      Intelligent AI guidance for emergencies — floods, fires, earthquakes, and medical crises. Real-time assistance when every second counts, built for ultimate resilience.
+    </p>
+    
+    <div class="animate-slide-up flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto" style="animation-delay: 0.4s;">
+      <a href="{{ url_for('auth.register') }}" class="w-full sm:w-auto bg-slate-100 text-slate-900 hover:bg-white hover:scale-105 transition-all shadow-[0_0_15px_rgba(255,255,255,0.3)] text-lg px-8 py-4 rounded-full flex items-center justify-center gap-2 shadow-xl shadow-slate-500/10">
+        <i class="ri-rocket-line"></i> Start Free Trial
+      </a>
+      <a href="{{ url_for('chat.chatbot') if current_user.is_authenticated else url_for('auth.login') }}" class="w-full sm:w-auto glass-panel hover:bg-slate-800/80 text-white text-lg px-8 py-4 rounded-full flex items-center justify-center gap-2 transition-all">
+        <i class="ri-robot-2-line text-slate-300"></i> Try AI Chatbot
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Floating Stats Bar -->
+<div class="max-w-5xl mx-auto px-6 relative z-20 -mt-16 sm:-mt-24 mb-32 animate-slide-up" style="animation-delay: 0.6s;">
+  <div class="glass-card p-6 sm:p-10 rounded-3xl border-slate-700/50 shadow-2xl shadow-black/50">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-slate-800">
+      <div>
+        <div class="text-3xl sm:text-4xl font-bold text-white mb-2 font-heading text-gradient">6+</div>
+        <div class="text-sm font-medium text-slate-400 uppercase tracking-wider">Disaster Types</div>
+      </div>
+      <div>
+        <div class="text-3xl sm:text-4xl font-bold text-white mb-2 font-heading text-gradient">8</div>
+        <div class="text-sm font-medium text-slate-400 uppercase tracking-wider">AI Intents</div>
+      </div>
+      <div>
+        <div class="text-3xl sm:text-4xl font-bold text-white mb-2 font-heading text-gradient">24/7</div>
+        <div class="text-sm font-medium text-slate-400 uppercase tracking-wider">Availability</div>
+      </div>
+      <div>
+        <div class="text-3xl sm:text-4xl font-bold text-white mb-2 font-heading text-gradient">112</div>
+        <div class="text-sm font-medium text-slate-400 uppercase tracking-wider">Emergency Links</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bento Box Features -->
+<section class="max-w-7xl mx-auto px-6 py-24">
+  <div class="text-center mb-16">
+    <h2 class="font-heading text-3xl md:text-5xl font-bold text-white mb-4">Powered by <span class="text-transparent bg-clip-text bg-gradient-to-r from-gray-100 to-slate-400">Artificial Intelligence</span></h2>
+    <p class="text-lg text-slate-400">Advanced NLP to understand your emergency and respond instantly</p>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 auto-rows-[minmax(250px,auto)]">
+    <!-- NLP Feature (Large span 2 cols) -->
+    <div class="glass-card md:col-span-2 p-8 md:p-12 flex flex-col justify-center relative overflow-hidden group">
+      <div class="absolute -right-20 -bottom-20 w-64 h-64 bg-slate-500/5 rounded-full blur-3xl group-hover:bg-slate-500/10 transition-all duration-500"></div>
+      <div class="w-16 h-16 rounded-2xl bg-slate-500/10 border border-slate-500/30 flex items-center justify-center text-3xl mb-6 shadow-lg shadow-slate-600/5 text-slate-300">
+        <i class="ri-brain-line"></i>
+      </div>
+      <h3 class="text-2xl font-bold text-white mb-4 font-heading">NLP Intent Detection</h3>
+      <p class="text-slate-400 text-lg leading-relaxed max-w-xl">Advanced natural language processing classifies your emergency in real-time using TF-IDF and Naive Bayes classification. It understands context, panic, and urgency instantly.</p>
+    </div>
+
+    <!-- Instant Responses -->
+    <div class="glass-card p-8 flex flex-col justify-center group relative overflow-hidden">
+      <div class="absolute -top-10 -right-10 w-32 h-32 bg-slate-400/5 rounded-full blur-2xl group-hover:bg-slate-400/10 transition-all duration-500"></div>
+      <div class="w-14 h-14 rounded-2xl bg-slate-400/10 border border-slate-500/30 flex items-center justify-center text-2xl mb-6 text-slate-300 shadow-lg shadow-slate-500/5">
+        <i class="ri-flashlight-line"></i>
+      </div>
+      <h3 class="text-xl font-bold text-white mb-3 font-heading">Instant AI Responses</h3>
+      <p class="text-slate-400">Context-aware emergency guidance delivered immediately with step-by-step instructions.</p>
+    </div>
+
+    <!-- Critical Escalation -->
+    <div class="glass-card p-8 flex flex-col justify-center border-red-500/30 relative overflow-hidden group" style="background: linear-gradient(145deg, rgba(239,68,68,0.05), rgba(15,23,42,0.9));">
+      <div class="absolute inset-0 bg-red-500/5 group-hover:bg-red-500/10 transition-all duration-500"></div>
+      <div class="relative z-10">
+        <div class="w-14 h-14 rounded-2xl bg-red-500/20 border border-red-500/30 flex items-center justify-center text-2xl mb-6 text-red-400 emergency-pulse">
+          <i class="ri-alarm-warning-line"></i>
+        </div>
+        <h3 class="text-xl font-bold text-red-400 mb-3 font-heading">Critical Escalation</h3>
+        <p class="text-slate-400">Automatically detects life-threatening situations and escalates with priority alerts.</p>
+      </div>
+    </div>
+
+    <!-- Analytics & Secure Auth (Large span 2 cols) -->
+    <div class="glass-card md:col-span-2 p-8 md:p-12 flex flex-col justify-center">
+      <div class="grid sm:grid-cols-2 gap-8">
+        <div>
+          <div class="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-2xl mb-6 text-emerald-400 shadow-lg shadow-emerald-500/10">
+            <i class="ri-pie-chart-2-line"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3 font-heading">Analytics Dashboard</h3>
+          <p class="text-slate-400 text-sm">Real-time visualization of disaster trends, query patterns, and emergency statistics for informed decision-making.</p>
+        </div>
+        <div>
+          <div class="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-2xl mb-6 text-amber-400 shadow-lg shadow-amber-500/10">
+            <i class="ri-shield-keyhole-line"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3 font-heading">Secure Authentication</h3>
+          <p class="text-slate-400 text-sm">Role-based access control with encrypted passwords. Separate user and admin portals with full audit trails.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Coverage Strip -->
+<section class="max-w-7xl mx-auto px-6 py-16 mb-24">
+  <div class="text-center mb-10">
+    <h2 class="font-heading text-3xl font-bold text-white mb-3">Emergency Coverage</h2>
+    <p class="text-slate-400">Specialized guidance for every disaster type</p>
+  </div>
+  
+  <div class="flex flex-wrap justify-center gap-4">
+    <a href="{{ url_for('auth.login') }}" class="glass-panel hover:bg-slate-400/5 hover:border-slate-500/30 px-6 py-4 rounded-2xl flex items-center gap-3 transition-all">
+      <span class="text-2xl text-slate-300">🌊</span> <span class="font-medium">Flood</span>
+    </a>
+    <a href="{{ url_for('auth.login') }}" class="glass-panel hover:bg-orange-500/10 hover:border-orange-500/30 px-6 py-4 rounded-2xl flex items-center gap-3 transition-all">
+      <span class="text-2xl text-orange-400">🔥</span> <span class="font-medium">Fire</span>
+    </a>
+    <a href="{{ url_for('auth.login') }}" class="glass-panel hover:bg-amber-500/10 hover:border-amber-500/30 px-6 py-4 rounded-2xl flex items-center gap-3 transition-all">
+      <span class="text-2xl text-amber-600">🏚️</span> <span class="font-medium">Earthquake</span>
+    </a>
+    <a href="{{ url_for('auth.login') }}" class="glass-panel hover:bg-emerald-500/10 hover:border-emerald-500/30 px-6 py-4 rounded-2xl flex items-center gap-3 transition-all">
+      <span class="text-2xl text-emerald-400">🏥</span> <span class="font-medium">Medical</span>
+    </a>
+    <a href="{{ url_for('auth.login') }}" class="glass-panel hover:bg-slate-500/10 hover:border-slate-500/30 px-6 py-4 rounded-2xl flex items-center gap-3 transition-all">
+      <span class="text-2xl text-slate-400">🌀</span> <span class="font-medium">Cyclone</span>
+    </a>
+  </div>
+</section>
+
+<!-- CTA Island -->
+<section class="max-w-5xl mx-auto px-6 pb-32">
+  <div class="glass-card p-12 md:p-20 text-center relative overflow-hidden rounded-[3rem] border-slate-700/50 shadow-2xl">
+    <!-- Background Gradient -->
+    <div class="absolute inset-0 bg-gradient-to-b from-blue-500/10 to-transparent pointer-events-none"></div>
+    
+    <div class="relative z-10">
+      <div class="inline-flex items-center gap-3 px-6 py-3 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-semibold tracking-wide mb-8 mx-auto shadow-lg shadow-red-500/10">
+        <span class="w-3 h-3 rounded-full bg-red-500 emergency-pulse"></span>
+        Emergency? Call 112 (National) | 108 (Ambulance)
+      </div>
+      
+      <h2 class="font-heading text-4xl md:text-5xl font-bold text-white mb-6">Ready to Get AI Emergency Help?</h2>
+      <p class="text-lg text-slate-400 max-w-2xl mx-auto mb-10">Join SmartAssist and get intelligent disaster guidance at your fingertips in seconds.</p>
+      
+      <div class="flex flex-col sm:flex-row justify-center gap-4">
+        <a href="{{ url_for('auth.register') }}" class="bg-slate-100 text-slate-900 hover:bg-white hover:scale-105 transition-all shadow-[0_0_15px_rgba(255,255,255,0.3)] px-10 py-4 rounded-full text-lg font-semibold flex items-center justify-center gap-2">
+          Create Free Account <i class="ri-arrow-right-line"></i>
+        </a>
+        <a href="{{ url_for('auth.login') }}" class="glass-panel hover:bg-slate-800/80 text-white px-10 py-4 rounded-full text-lg font-semibold transition-all">
+          Sign In
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="border-t border-slate-800/50 bg-slate-900/50 py-12">
+  <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600 flex items-center justify-center text-sm"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="w-full h-full p-1.5 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8.5 4.5C8.5 4.5 5 8.5 5 12C5 15.5 8.5 19.5 8.5 19.5" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M15.5 19.5C15.5 19.5 19 15.5 19 12C19 8.5 15.5 4.5 15.5 4.5" stroke="#9CA3AF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8.5 12C10.5 10 13.5 10 15.5 12" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
+      </svg></div>
+      <span class="font-heading font-bold text-xl text-white">SmartAssist</span>
+    </div>
+    
+    <p class="text-slate-500 text-sm">© {{ current_year }} SmartAssist AI Disaster Platform. Final Year Project.</p>
+    
+    <div class="flex items-center gap-6">
+      <a href="{{ url_for('auth.login') }}" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Login</a>
+      <a href="{{ url_for('auth.register') }}" class="text-sm font-medium text-slate-400 hover:text-white transition-colors">Register</a>
+      <a href="#" class="text-xl text-slate-400 hover:text-slate-300 transition-colors"><i class="ri-github-fill"></i></a>
+      <a href="#" class="text-xl text-slate-400 hover:text-slate-300 transition-colors"><i class="ri-twitter-x-line"></i></a>
+    </div>
+  </div>
+</footer>
+{% endblock %}

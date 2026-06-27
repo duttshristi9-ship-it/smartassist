@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}SmartAssist{% endblock %} | AI Disaster Management</title>
+<meta name="description" content="{% block meta_desc %}SmartAssist - AI-Powered Disaster Management Support System{% endblock %}">
+
+<!-- Tailwind CSS via CDN -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          heading: ['Outfit', 'sans-serif'],
+        },
+        colors: {
+          glass: 'rgba(15, 23, 42, 0.75)',
+          dark: '#0B1120',
+        }
+      }
+    }
+  }
+</script>
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+<link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+{% block head %}{% endblock %}
+</head>
+<body class="bg-dark text-slate-100 min-h-screen overflow-x-hidden selection:bg-blue-500 selection:text-white relative">
+{% if current_user.is_authenticated %}
+
+  <!-- Thin Left Sidebar (HUD Style) -->
+  <aside class="fixed top-0 left-0 h-screen w-[72px] z-50 bg-[#121626]/90 backdrop-blur-md border-r border-[rgba(255,255,255,0.05)] flex flex-col items-center py-5 justify-between">
+    
+    <!-- Top: Logo -->
+    <a href="{{ url_for('dashboard.index') }}" class="w-10 h-10 rounded-xl bg-slate-800/50 border border-slate-700/50 flex items-center justify-center text-white hover:bg-slate-700/50 transition-all shadow-md group">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="w-5 h-5 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8.5 4.5C8.5 4.5 5 8.5 5 12C5 15.5 8.5 19.5 8.5 19.5" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M15.5 19.5C15.5 19.5 19 15.5 19 12C19 8.5 15.5 4.5 15.5 4.5" stroke="#9CA3AF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8.5 12C10.5 10 13.5 10 15.5 12" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </a>
+
+    <!-- Center: Nav Icons -->
+    <nav class="flex flex-col gap-4 w-full px-3">
+      <!-- Dashboard -->
+      <a href="{{ url_for('dashboard.index') }}" class="w-full aspect-square rounded-xl flex items-center justify-center transition-all {% if request.endpoint == 'dashboard.index' %}bg-white/10 text-white border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]{% else %}text-slate-500 hover:text-slate-300 hover:bg-slate-800/50{% endif %}" title="Dashboard">
+        <i class="ri-grid-fill text-xl"></i>
+      </a>
+      
+      <!-- Users/Contacts -->
+      {% if current_user.is_admin() %}
+      <a href="{{ url_for('admin.users') }}" class="w-full aspect-square rounded-xl flex items-center justify-center transition-all {% if request.endpoint == 'admin.users' %}bg-white/10 text-white border border-white/20{% else %}text-slate-500 hover:text-slate-300 hover:bg-slate-800/50{% endif %}" title="Users">
+        <i class="ri-contacts-book-2-fill text-xl"></i>
+      </a>
+      {% endif %}
+
+      <!-- Alerts/Notifications (with badge) -->
+      <a href="javascript:void(0)" onclick="showToast('4 New Critical Incident Alerts!', 'alert')" class="relative w-full aspect-square rounded-xl flex items-center justify-center transition-all text-slate-500 hover:text-white hover:bg-slate-800/50 group" title="Alerts">
+        <i class="ri-notification-3-fill text-xl group-hover:scale-110 transition-transform"></i>
+        <span class="absolute top-2 right-2.5 w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] border border-[#121626] animate-pulse"></span>
+      </a>
+
+      <!-- Analytics -->
+      <a href="{{ url_for('analytics.index') }}" class="w-full aspect-square rounded-xl flex items-center justify-center transition-all group {% if request.endpoint == 'analytics.index' %}bg-white/10 text-white border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]{% else %}text-slate-500 hover:text-white hover:bg-slate-800/50{% endif %}" title="Analytics">
+        <i class="ri-bar-chart-box-fill text-xl group-hover:scale-110 transition-transform"></i>
+      </a>
+
+      <!-- Chatbot -->
+      <a href="{{ url_for('chat.chatbot') }}" class="w-full aspect-square rounded-xl flex items-center justify-center transition-all group {% if request.endpoint == 'chat.chatbot' %}bg-white/10 text-white border border-white/20 shadow-[0_0_15px_rgba(255,255,255,0.1)]{% else %}text-slate-500 hover:text-white hover:bg-slate-800/50{% endif %}" title="AI Chatbot">
+        <i class="ri-message-3-fill text-xl group-hover:scale-110 transition-transform"></i>
+      </a>
+    </nav>
+
+    <!-- Bottom: Settings & Logout -->
+    <div class="flex flex-col gap-4 w-full px-3">
+      <a href="javascript:void(0)" onclick="showToast('Opening System Settings...', 'info')" class="w-full aspect-square rounded-xl flex items-center justify-center transition-all group text-slate-500 hover:text-white hover:bg-slate-800/50" title="Settings">
+        <i class="ri-settings-4-fill text-xl group-hover:rotate-90 transition-transform duration-300"></i>
+      </a>
+      <a href="{{ url_for('auth.logout') }}" class="w-full aspect-square rounded-xl flex items-center justify-center transition-all group text-slate-500 hover:text-red-400 hover:bg-red-500/10" title="Logout">
+        <i class="ri-logout-circle-line text-xl group-hover:scale-110 transition-transform"></i>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="ml-[72px] min-h-screen relative w-[calc(100%-72px)]">
+    <!-- Flash Messages (floating to prevent layout shifting) -->
+    <div class="fixed top-8 left-1/2 transform -translate-x-1/2 w-full max-w-lg z-[100] px-4 pointer-events-none">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="space-y-3 pointer-events-auto">
+          {% for cat, msg in messages %}
+            {% set color = 'emerald' if cat == 'success' else 'red' if cat == 'danger' else 'amber' if cat == 'warning' else 'blue' %}
+            {% set icon = 'checkbox-circle' if cat == 'success' else 'error-warning' if cat == 'danger' else 'alert' if cat == 'warning' else 'information' %}
+            <div class="flex items-center gap-3 p-4 rounded-xl border border-{{ color }}-500/30 bg-{{ color }}-500/10 backdrop-blur-md text-{{ color }}-200 animate-slide-up shadow-lg shadow-{{ color }}-500/5">
+              <i class="ri-{{ icon }}-fill text-2xl text-{{ color }}-400"></i>
+              <p class="font-medium text-sm">{{ msg }}</p>
+            </div>
+          {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+    </div>
+
+    <!-- Inner Content -->
+    {% block content_wrapper %}
+    <div class="w-full h-full relative">
+      {% block content %}{% endblock %}
+    </div>
+    {% endblock %}
+  </main>
+
+{% else %}
+  <main class="w-full min-h-screen bg-dark">
+    {% block public_content %}{% endblock %}
+  </main>
+{% endif %}
+{% block scripts %}{% endblock %}
+
+<!-- Global Toast Container -->
+<div id="globalToastContainer" class="fixed bottom-5 right-5 z-[9999] flex flex-col gap-2 pointer-events-none"></div>
+
+<script>
+  window.showToast = function(message, type='info') {
+    const container = document.getElementById('globalToastContainer');
+    const toast = document.createElement('div');
+    
+    let colorClass = 'border-slate-700/80 bg-slate-900/90 text-white';
+    let iconClass = 'ri-information-line text-blue-400';
+    
+    if(type === 'alert') {
+        colorClass = 'border-red-500/50 bg-red-900/90 text-white';
+        iconClass = 'ri-alert-line text-red-400';
+    } else if(type === 'success') {
+        colorClass = 'border-emerald-500/50 bg-emerald-900/90 text-white';
+        iconClass = 'ri-checkbox-circle-line text-emerald-400';
+    }
+
+    toast.className = `glass-panel px-4 py-2 rounded shadow-xl text-xs font-bold uppercase tracking-wider animate-slide-up flex items-center gap-2 border ${colorClass}`;
+    toast.innerHTML = `<i class="${iconClass}"></i> ${message}`;
+    container.appendChild(toast);
+    
+    setTimeout(() => {
+      toast.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+      setTimeout(() => toast.remove(), 500);
+    }, 3000);
+  };
+</script>
+
+</body>
+</html>

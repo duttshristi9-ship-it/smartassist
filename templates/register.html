@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+
+{% block public_content %}
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+  <!-- Background Elements -->
+  <div class="absolute top-0 left-0 w-[500px] h-[500px] bg-slate-500/10 rounded-full blur-[120px] -z-10 pointer-events-none float-anim"></div>
+  <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-slate-400/10 rounded-full blur-[120px] -z-10 pointer-events-none float-anim" style="animation-delay: 2s;"></div>
+
+  <div class="max-w-md w-full space-y-8 animate-slide-up">
+    <!-- Logo & Header -->
+    <div class="text-center">
+      <a href="{{ url_for('main.landing') }}" class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-900 border border-slate-600 text-3xl shadow-lg shadow-slate-600/20 mb-6 mx-auto">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="w-full h-full p-1.5 group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8.5 4.5C8.5 4.5 5 8.5 5 12C5 15.5 8.5 19.5 8.5 19.5" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M15.5 19.5C15.5 19.5 19 15.5 19 12C19 8.5 15.5 4.5 15.5 4.5" stroke="#9CA3AF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M8.5 12C10.5 10 13.5 10 15.5 12" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      </a>
+      <h2 class="font-heading text-3xl font-extrabold text-white tracking-tight">
+        Create an account
+      </h2>
+      <p class="mt-2 text-sm text-slate-400">
+        Already have an account? 
+        <a href="{{ url_for('auth.login') }}" class="font-medium text-slate-300 hover:text-purple-300 transition-colors">Sign in here</a>
+      </p>
+    </div>
+
+    <!-- Form Container -->
+    <div class="glass-card p-8 sm:p-10 shadow-2xl">
+      <!-- Flash Messages -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="mb-6 space-y-2">
+          {% for cat, msg in messages %}
+            {% set color = 'emerald' if cat == 'success' else 'red' if cat == 'danger' else 'amber' if cat == 'warning' else 'blue' %}
+            <div class="px-4 py-3 rounded-lg border border-{{ color }}-500/30 bg-{{ color }}-500/10 text-{{ color }}-400 text-sm font-medium">
+              {{ msg }}
+            </div>
+          {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <form class="space-y-5" action="{{ url_for('auth.register') }}" method="POST">
+        <div>
+          <label for="name" class="block text-sm font-medium text-slate-300 mb-2">Full Name</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+              <i class="ri-user-line"></i>
+            </div>
+            <input id="name" name="name" type="text" autocomplete="name" required 
+                   class="glass-input block w-full pl-10 sm:text-sm rounded-xl py-3" 
+                   placeholder="John Doe"
+                   value="{{ name if name else '' }}">
+          </div>
+        </div>
+
+        <div>
+          <label for="email" class="block text-sm font-medium text-slate-300 mb-2">Email address</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+              <i class="ri-mail-line"></i>
+            </div>
+            <input id="email" name="email" type="email" autocomplete="email" required 
+                   class="glass-input block w-full pl-10 sm:text-sm rounded-xl py-3" 
+                   placeholder="you@example.com"
+                   value="{{ email if email else '' }}">
+          </div>
+        </div>
+
+        <div>
+          <label for="password" class="block text-sm font-medium text-slate-300 mb-2">Password</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+              <i class="ri-lock-line"></i>
+            </div>
+            <input id="password" name="password" type="password" autocomplete="new-password" required minlength="8"
+                   class="glass-input block w-full pl-10 sm:text-sm rounded-xl py-3" 
+                   placeholder="••••••••">
+          </div>
+          <p class="mt-2 text-xs text-slate-500">Must be at least 8 characters long.</p>
+        </div>
+
+        <div>
+          <label for="confirm_password" class="block text-sm font-medium text-slate-300 mb-2">Confirm Password</label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500">
+              <i class="ri-lock-line"></i>
+            </div>
+            <input id="confirm_password" name="confirm_password" type="password" autocomplete="new-password" required minlength="8"
+                   class="glass-input block w-full pl-10 sm:text-sm rounded-xl py-3" 
+                   placeholder="••••••••">
+          </div>
+        </div>
+
+        <div class="pt-2">
+          <button type="submit" class="w-full bg-slate-100 text-slate-900 hover:bg-white hover:scale-105 transition-all shadow-[0_0_15px_rgba(255,255,255,0.3)] flex justify-center py-3 px-4 rounded-xl text-sm font-semibold shadow-lg shadow-purple-500/20" style="background: linear-gradient(135deg, #8b5cf6, #3b82f6);">
+            Create Account
+          </button>
+        </div>
+      </form>
+      
+      <!-- Back to Home -->
+      <div class="mt-8 text-center">
+        <a href="{{ url_for('main.landing') }}" class="text-sm font-medium text-slate-500 hover:text-slate-300 flex items-center justify-center gap-1 transition-colors">
+          <i class="ri-arrow-left-line"></i> Back to Home
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

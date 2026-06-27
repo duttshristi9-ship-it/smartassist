@@ -1,0 +1,671 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block page_title %}Dashboard{% endblock %}
+
+{% block head %}
+<!-- Leaflet Map CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<style>
+  /* Custom tactical tooltips */
+  .custom-marker-tooltip {
+    background: rgba(13, 17, 28, 0.9) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    color: #ffffff !important;
+    border-radius: 8px !important;
+    padding: 6px 10px !important;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    font-family: 'Inter', sans-serif !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5) !important;
+  }
+  
+  .custom-tooltip-fire { border-left: 3px solid #EF4444 !important; }
+  .custom-tooltip-flood { border-left: 3px solid #38BDF8 !important; }
+  .custom-tooltip-storm { border-left: 3px solid #F97316 !important; }
+  .custom-tooltip-medical { border-left: 3px solid #10B981 !important; }
+  .custom-tooltip-roadblock { border-left: 3px solid #A855F7 !important; }
+  .custom-tooltip-gas { border-left: 3px solid #EAB308 !important; }
+  .custom-tooltip-police { border-left: 3px solid #3B82F6 !important; }
+
+  /* Hide default leaflet controls if any */
+  .leaflet-control-container { display: none !important; }
+
+  .user-location-pulse {
+    filter: drop-shadow(0 0 6px rgba(59,130,246, 0.8));
+    animation: bluePulse 2s infinite;
+  }
+  @keyframes bluePulse {
+    0% { filter: drop-shadow(0 0 6px rgba(59,130,246, 0.8)); }
+    50% { filter: drop-shadow(0 0 12px rgba(59,130,246, 1)); }
+    100% { filter: drop-shadow(0 0 6px rgba(59,130,246, 0.8)); }
+  }
+
+</style>
+{% endblock %}
+
+{% block content_wrapper %}
+<!-- Full Screen Map Background -->
+<div id="map" class="fixed inset-0 w-full h-full z-0 bg-[#070a13]"></div>
+
+<!-- Secondary HUD Left Panel (Fixed next to thin sidebar) -->
+<div class="fixed top-0 left-[72px] h-screen w-80 bg-[#0B1120]/95 backdrop-blur-xl border-r border-slate-800/80 z-40 flex flex-col custom-scrollbar overflow-y-auto">
+  
+  <!-- Header: Logo & Location -->
+  <div class="p-5 border-b border-slate-800/80 flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" class="w-5 h-5" xmlns="http://www.w3.org/2000/svg">
+        <path d="M8.5 4.5C8.5 4.5 5 8.5 5 12C5 15.5 8.5 19.5 8.5 19.5" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M15.5 19.5C15.5 19.5 19 15.5 19 12C19 8.5 15.5 4.5 15.5 4.5" stroke="#9CA3AF" stroke-width="2.5" stroke-linecap="round"/>
+        <path d="M8.5 12C10.5 10 13.5 10 15.5 12" stroke="#6B7280" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+      <span class="font-heading font-bold text-sm tracking-wide text-white">SmartAssist</span>
+    </div>
+    
+
+  </div>
+
+  <div class="p-4 space-y-4 flex-1">
+    
+    <!-- Mission Status Card -->
+    <div class="glass-panel rounded-xl p-4 border border-slate-800/80 bg-slate-900/40 relative overflow-hidden">
+      <div class="flex items-center justify-between mb-2 relative z-10">
+        <div class="flex items-center gap-2 text-slate-400">
+          <i class="ri-focus-3-line text-lg"></i>
+          <span class="text-[10px] font-bold tracking-widest uppercase">Mission Status</span>
+        </div>
+      </div>
+      <div class="flex items-end justify-between relative z-10">
+        <div>
+          <span class="text-[10px] font-bold text-slate-500 uppercase">Active Tasks</span>
+          <div class="text-4xl font-heading font-black text-white mt-1 leading-none">332</div>
+          <div class="flex items-center gap-1 text-slate-500 text-[9px] mt-2 font-medium">
+            <i class="ri-time-line"></i> Updated 2 min ago
+          </div>
+        </div>
+        <!-- Live Indicator Circle -->
+        <div class="w-12 h-12 rounded-full border-2 border-white/30 flex items-center justify-center relative">
+          <div class="absolute inset-0 rounded-full border border-white/20 animate-ping"></div>
+          <span class="text-[9px] font-bold text-gray-300 uppercase">Live</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Critical Incidents Header -->
+    <div class="glass-panel rounded-xl border border-slate-800/80 bg-slate-900/40 flex items-center justify-between p-3 cursor-pointer hover:bg-slate-800/50 transition-colors">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400">
+          <i class="ri-alert-fill"></i>
+        </div>
+        <div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block leading-tight">Critical Incidents</span>
+          <div class="flex items-baseline gap-2">
+            <span class="text-xl font-heading font-bold text-white">4</span>
+            <span class="text-[9px] text-slate-500 uppercase font-bold">Active Now</span>
+          </div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="px-1.5 py-0.5 rounded bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]/20 border border-red-500/30 text-[8px] font-bold text-white uppercase tracking-wider">Live</span>
+        <i class="ri-arrow-right-s-line text-slate-500"></i>
+      </div>
+    </div>
+
+    <!-- Incidents By Type -->
+    <div class="glass-panel rounded-xl border border-slate-800/80 bg-slate-900/40 p-4">
+      <div class="flex items-center gap-2 text-slate-400 mb-4">
+        <i class="ri-pie-chart-2-fill text-sm"></i>
+        <span class="text-[10px] font-bold tracking-widest uppercase">Incidents By Type</span>
+      </div>
+      <div class="flex items-center justify-between">
+        <!-- Fire -->
+        <div class="flex flex-col items-center gap-1">
+          <div class="flex items-center gap-1 text-white">
+            <i class="ri-fire-fill text-[10px]"></i>
+            <span class="text-sm font-bold text-white">12</span>
+          </div>
+          <span class="text-[8px] font-bold text-slate-500 uppercase">Fire</span>
+        </div>
+        <!-- Flood -->
+        <div class="flex flex-col items-center gap-1">
+          <div class="flex items-center gap-1 text-gray-300">
+            <i class="ri-water-flash-fill text-[10px]"></i>
+            <span class="text-sm font-bold text-white">08</span>
+          </div>
+          <span class="text-[8px] font-bold text-slate-500 uppercase">Flood</span>
+        </div>
+        <!-- Storm -->
+        <div class="flex flex-col items-center gap-1">
+          <div class="flex items-center gap-1 text-gray-400">
+            <i class="ri-thunderstorms-fill text-[10px]"></i>
+            <span class="text-sm font-bold text-white">05</span>
+          </div>
+          <span class="text-[8px] font-bold text-slate-500 uppercase">Storm</span>
+        </div>
+        <!-- Medical -->
+        <div class="flex flex-col items-center gap-1">
+          <div class="flex items-center gap-1 text-gray-500">
+            <i class="ri-hospital-fill text-[10px]"></i>
+            <span class="text-sm font-bold text-white">03</span>
+          </div>
+          <span class="text-[8px] font-bold text-slate-500 uppercase">Medical</span>
+        </div>
+        <!-- Other -->
+        <div class="flex flex-col items-center gap-1">
+          <div class="flex items-center gap-1 text-gray-600">
+            <i class="ri-shield-cross-fill text-[10px]"></i>
+            <span class="text-sm font-bold text-white">02</span>
+          </div>
+          <span class="text-[8px] font-bold text-slate-500 uppercase">Other</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- AI Chatbot Banner -->
+    <a href="{{ url_for('chat.chatbot') }}" class="block rounded-xl p-4 bg-gradient-to-br from-gray-900/80 to-gray-800/60 border border-gray-500/30 relative overflow-hidden group hover:border-purple-400/50 transition-colors shadow-[0_0_20px_rgba(168,85,247,0.15)]">
+      <div class="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+        <i class="ri-robot-fill text-6xl text-gray-300"></i>
+      </div>
+      <div class="flex items-start gap-3 relative z-10">
+        <div class="w-10 h-10 rounded-full bg-gray-600 flex items-center justify-center text-white shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+          <i class="ri-robot-2-fill text-lg"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider">AI Chatbot</h4>
+          <p class="text-[10px] font-semibold text-gray-300 mt-0.5 mb-1.5 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_5px_rgba(255,255,255,1)]"></span>
+            AI Assistant Online
+          </p>
+          <p class="text-[9px] text-gray-400 max-w-[160px]">Ask anything about incidents, alerts, resources...</p>
+        </div>
+        <div class="absolute right-0 top-1/2 -translate-y-1/2 w-6 h-6 rounded bg-gray-700/50 flex items-center justify-center text-gray-300">
+          <i class="ri-arrow-right-up-line text-xs"></i>
+        </div>
+      </div>
+    </a>
+
+    <!-- Action Grid (2x3) -->
+    <div class="grid grid-cols-2 gap-3">
+      <!-- Comms -->
+      <a href="{{ url_for('chat.chatbot') }}" class="glass-panel p-3 rounded-xl border border-slate-800/80 hover:bg-slate-800/50 transition-colors flex flex-col relative group">
+        <i class="ri-message-3-fill text-gray-300 text-lg mb-2"></i>
+        <span class="text-[9px] font-bold text-white uppercase tracking-wider block mb-0.5">Dispatch Comms</span>
+        <span class="text-[8px] text-slate-500">Open Channel</span>
+        <i class="ri-arrow-up-s-fill text-white absolute top-2 right-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+      </a>
+      <!-- Analytics -->
+      <a href="{{ url_for('analytics.index') }}" class="glass-panel p-3 rounded-xl border border-slate-800/80 hover:bg-slate-800/50 transition-colors flex flex-col relative group">
+        <i class="ri-bar-chart-box-fill text-gray-300 text-lg mb-2"></i>
+        <span class="text-[9px] font-bold text-white uppercase tracking-wider block mb-0.5">Analytics</span>
+        <span class="text-[8px] text-slate-500">View Insights</span>
+        <i class="ri-arrow-up-s-fill text-white absolute top-2 right-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+      </a>
+      <!-- Allocation -->
+      <a href="javascript:void(0)" onclick="showToast('Loading Resource Matrix...', 'info')" class="glass-panel p-3 rounded-xl border border-slate-800/80 hover:bg-slate-800/50 transition-colors flex flex-col relative group">
+        <i class="ri-box-3-fill text-gray-300 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
+        <span class="text-[9px] font-bold text-white uppercase tracking-wider block mb-0.5">Resource Allocation</span>
+        <span class="text-[8px] text-slate-500">Manage Resources</span>
+        <i class="ri-arrow-up-s-fill text-white absolute top-2 right-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+      </a>
+      <!-- Alerts -->
+      <a href="javascript:void(0)" onclick="showToast('4 New Critical Incident Alerts!', 'alert')" class="glass-panel p-3 rounded-xl border border-slate-800/80 hover:bg-slate-800/50 transition-colors flex flex-col relative group">
+        <i class="ri-notification-3-fill text-red-500 text-lg mb-2 animate-pulse group-hover:scale-110 transition-transform"></i>
+        <span class="text-[9px] font-bold text-white uppercase tracking-wider block mb-0.5">Alerts</span>
+        <span class="text-[8px] text-slate-500">View All Alerts</span>
+        <i class="ri-arrow-up-s-fill text-white absolute top-2 right-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+      </a>
+      <!-- Reports -->
+      <a href="javascript:void(0)" onclick="showToast('Generating Situation Report...', 'success')" class="glass-panel p-3 rounded-xl border border-slate-800/80 hover:bg-slate-800/50 transition-colors flex flex-col relative group">
+        <i class="ri-file-list-3-fill text-gray-400 text-lg mb-2 group-hover:scale-110 transition-transform"></i>
+        <span class="text-[9px] font-bold text-white uppercase tracking-wider block mb-0.5">Emergency Reports</span>
+        <span class="text-[8px] text-slate-500">View & Manage</span>
+        <i class="ri-arrow-up-s-fill text-white absolute top-2 right-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+      </a>
+      <!-- Settings -->
+      <a href="javascript:void(0)" onclick="showToast('Opening System Settings...', 'info')" class="glass-panel p-3 rounded-xl border border-slate-800/80 hover:bg-slate-800/50 transition-colors flex flex-col relative group">
+        <i class="ri-settings-4-fill text-slate-400 text-lg mb-2 group-hover:rotate-90 transition-transform duration-300"></i>
+        <span class="text-[9px] font-bold text-white uppercase tracking-wider block mb-0.5">Settings</span>
+        <span class="text-[8px] text-slate-500">System Settings</span>
+        <i class="ri-arrow-up-s-fill text-white absolute top-2 right-2 text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
+      </a>
+    </div>
+
+  </div>
+
+  <!-- Footer Profile -->
+  <div class="mt-auto p-4 border-t border-slate-800/80 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-full overflow-hidden border border-slate-700 bg-slate-800 flex-shrink-0">
+        <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=80" alt="Avatar" class="w-full h-full object-cover">
+      </div>
+      <div>
+        <div class="text-[11px] font-bold text-white">{{ current_user.name }}</div>
+        <div class="text-[9px] font-semibold text-slate-500">{{ current_user.role|capitalize }}</div>
+      </div>
+    </div>
+    <button class="text-slate-500 hover:text-white transition-colors">
+      <i class="ri-more-fill"></i>
+    </button>
+  </div>
+
+</div>
+
+
+<!-- Floating Top Widgets -->
+<!-- Search & Weather -->
+<div class="fixed top-5 left-[420px] z-40 flex items-start gap-4">
+  
+  <!-- Search Bar -->
+  <div class="glass-panel flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-800/80 bg-slate-900/60 shadow-lg w-64">
+    <i class="ri-search-line text-slate-500"></i>
+    <input type="text" placeholder="Search location..." class="bg-transparent border-none outline-none text-sm text-white w-full placeholder-slate-500">
+  </div>
+
+  <!-- Weather Widget -->
+  <div class="glass-panel rounded-xl border border-slate-800/80 bg-slate-900/60 p-3 shadow-lg flex items-center gap-4">
+    <div class="flex items-center gap-2">
+      <i class="ri-sun-cloudy-fill text-2xl text-white drop-shadow-md"></i>
+      <div>
+        <div class="text-sm font-bold text-white leading-none">26°C</div>
+        <div class="text-[9px] text-slate-400 mt-0.5">Light Rain</div>
+      </div>
+    </div>
+    <div class="h-6 w-px bg-slate-800"></div>
+    <div class="flex flex-col gap-1 text-[9px] text-slate-400 font-semibold">
+      <div class="flex items-center gap-1"><i class="ri-windy-line"></i> 12 km/h</div>
+      <div class="flex items-center gap-1"><i class="ri-drop-line"></i> 78%</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Top Right Tools -->
+<div class="fixed top-5 right-5 z-40 flex items-center gap-3">
+  <button onclick="showToast('Live Feed Connected')" class="glass-panel flex items-center gap-2 px-4 py-2 rounded-lg border border-slate-800/80 bg-slate-900/60 hover:bg-slate-800 transition-colors shadow-lg">
+    <span class="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse"></span>
+    <span class="text-[11px] font-bold text-white uppercase tracking-wider">Live Feed</span>
+  </button>
+  
+  <div class="glass-panel flex items-center gap-1 p-1 rounded-lg border border-slate-800/80 bg-slate-900/60 shadow-lg">
+    <button onclick="locateUser()" title="My Location" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white rounded hover:bg-slate-800 transition-colors"><i class="ri-focus-3-line"></i></button>
+    <button onclick="showToast('Accessing Traffic Cameras...')" title="CCTV" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white rounded hover:bg-slate-800 transition-colors"><i class="ri-vidicon-line"></i></button>
+    <button onclick="toggleMapLayer()" title="Toggle Map Layer" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white rounded hover:bg-slate-800 transition-colors"><i class="ri-stack-line"></i></button>
+    <button onclick="showToast('Advanced Filters applied.')" title="Filters" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white rounded hover:bg-slate-800 transition-colors"><i class="ri-filter-3-line"></i></button>
+    <button onclick="toggleFullscreen()" title="Fullscreen" class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-white rounded hover:bg-slate-800 transition-colors"><i class="ri-fullscreen-line"></i></button>
+  </div>
+</div>
+
+
+<!-- Floating Bottom KPI Deck -->
+<div class="fixed bottom-5 left-[420px] right-[240px] z-40 hidden md:block">
+  <div class="glass-panel border border-slate-800/80 bg-slate-900/70 backdrop-blur-xl rounded-2xl p-4 shadow-[0_10px_40px_rgba(0,0,0,0.6)] flex items-center justify-between">
+    
+    <!-- KPI 1 -->
+    <div class="flex-1 px-4">
+      <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Total Incidents</div>
+      <div class="flex items-end gap-2">
+        <span class="text-2xl font-heading font-bold text-white leading-none">32</span>
+        <span class="text-[10px] font-bold text-white mb-0.5"><i class="ri-arrow-up-line"></i> 12%</span>
+      </div>
+      <div class="text-[9px] text-slate-500 mt-1">vs last 24h</div>
+    </div>
+    
+    <div class="w-px h-10 bg-slate-800"></div>
+
+    <!-- KPI 2 -->
+    <div class="flex-1 px-4">
+      <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Active Units</div>
+      <div class="flex items-end gap-2">
+        <span class="text-2xl font-heading font-bold text-white leading-none">48</span>
+        <span class="text-[10px] font-bold text-white mb-0.5"><i class="ri-arrow-up-line"></i> 5</span>
+      </div>
+      <div class="text-[9px] text-slate-500 mt-1">On Field</div>
+    </div>
+    
+    <div class="w-px h-10 bg-slate-800"></div>
+
+    <!-- KPI 3 -->
+    <div class="flex-1 px-4">
+      <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Avg Response Time</div>
+      <div class="flex items-end gap-2">
+        <span class="text-2xl font-heading font-bold text-white leading-none">18<span class="text-lg">m</span> 24<span class="text-lg">s</span></span>
+        <span class="text-[10px] font-bold text-gray-500 mb-0.5"><i class="ri-arrow-down-line"></i> 8%</span>
+      </div>
+      <div class="text-[9px] text-slate-500 mt-1">vs last 24h</div>
+    </div>
+
+    <div class="w-px h-10 bg-slate-800"></div>
+
+    <!-- KPI 4 -->
+    <div class="flex-1 px-4">
+      <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Resources Deployed</div>
+      <div class="flex items-end gap-2">
+        <span class="text-2xl font-heading font-bold text-white leading-none">145</span>
+        <span class="text-[10px] font-bold text-white mb-0.5"><i class="ri-arrow-up-line"></i> 7</span>
+      </div>
+      <div class="text-[9px] text-slate-500 mt-1">Units</div>
+    </div>
+
+    <div class="w-px h-10 bg-slate-800"></div>
+
+    <!-- KPI 5 -->
+    <div class="flex-1 px-4">
+      <div class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">People Impacted</div>
+      <div class="flex items-end gap-2">
+        <span class="text-2xl font-heading font-bold text-white leading-none">2.4K</span>
+        <span class="text-[10px] font-bold text-white mb-0.5"><i class="ri-arrow-up-line"></i> 18%</span>
+      </div>
+      <div class="text-[9px] text-slate-500 mt-1">Estimated</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Map Legend -->
+<div class="fixed bottom-5 right-5 z-40">
+  <div class="glass-panel border border-slate-800/80 bg-slate-900/60 p-4 rounded-xl shadow-lg flex flex-col gap-2.5">
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.8)]"></span>
+      <span class="text-[10px] font-semibold text-slate-300">Fire</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-sky-400 shadow-[0_0_8px_rgba(56,189,248,0.8)]"></span>
+      <span class="text-[10px] font-semibold text-slate-300">Flood</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]"></span>
+      <span class="text-[10px] font-semibold text-slate-300">Storm</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
+      <span class="text-[10px] font-semibold text-slate-300">Medical</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-gray-600"></span>
+      <span class="text-[10px] font-semibold text-slate-300">Road Block</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-yellow-500 shadow-[0_0_8px_rgba(234,179,8,0.8)]"></span>
+      <span class="text-[10px] font-semibold text-slate-300">Gas Leak</span>
+    </div>
+    <div class="flex items-center gap-2">
+      <span class="w-1.5 h-1.5 rounded-full bg-orange-500 shadow-[0_0_8px_rgba(249,115,22,0.8)]"></span>
+      <span class="text-[10px] font-semibold text-slate-300">Police</span>
+    </div>
+    
+    <div class="mt-2 pt-2 border-t border-slate-800 text-right">
+      <span class="text-[9px] font-medium text-slate-500 relative">
+        <span class="absolute right-0 -bottom-1 w-8 h-px bg-slate-500"></span>
+        500 m
+      </span>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script>
+  // Tactical Colors
+  const colors = {
+    fire: '#EF4444',
+    flood: '#38BDF8',
+    storm: '#F97316',
+    medical: '#10B981',
+    roadblock: '#A855F7',
+    gas: '#EAB308',
+    police: '#3B82F6'
+  };
+
+  const icons = {
+    fire: 'ri-fire-fill',
+    flood: 'ri-water-flash-fill',
+    storm: 'ri-thunderstorms-fill',
+    medical: 'ri-hospital-fill',
+    roadblock: 'ri-barricade-fill',
+    gas: 'ri-flask-fill',
+    police: 'ri-shield-star-fill'
+  };
+
+  let currentLayer = null;
+  const darkLayerUrl = 'https://mt1.google.com/vt/lyrs=m&x={x}&y={y}&z={z}';
+  const satelliteLayerUrl = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+
+  // Initialize Fullscreen Map
+  const map = L.map('map', {
+    zoomControl: false,
+    attributionControl: false
+  }).setView([40.7306, -73.9352], 12); // Default NYC
+
+  currentLayer = L.tileLayer(darkLayerUrl, {
+    maxZoom: 19
+  }).addTo(map);
+
+  function renderIncidents(incidents) {
+    incidents.forEach(inc => {
+      let color = colors[inc.type];
+      
+      // Draw the pulsating circle marker
+      let circle = L.circleMarker([inc.lat, inc.lng], {
+        radius: inc.dotOnly ? 4 : 8,
+        fillColor: color,
+        color: color,
+        weight: 1,
+        opacity: 0.8,
+        fillOpacity: 0.4,
+        className: 'pulse-marker'
+      }).addTo(map);
+
+      // Inner bright dot
+      let innerCircle = L.circleMarker([inc.lat, inc.lng], {
+        radius: inc.dotOnly ? 2 : 4,
+        fillColor: '#fff',
+        color: color,
+        weight: 1,
+        opacity: 1,
+        fillOpacity: 1
+      }).addTo(map);
+
+      // Smooth pan on click
+      let panMap = function() {
+        map.flyTo([inc.lat, inc.lng], 16, {
+          animate: true,
+          duration: 1.5
+        });
+      };
+      circle.on('click', panMap);
+      innerCircle.on('click', panMap);
+
+      // Attach custom HTML tooltip
+      if(!inc.dotOnly) {
+        let iconHtml = `<i class="${icons[inc.type]} text-[14px]"></i>`;
+        let levelColor = inc.level === 'HIGH' ? 'text-red-400' : inc.level === 'MEDIUM' ? 'text-orange-400' : 'text-emerald-400';
+        
+        let tooltipContent = `
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center text-white" style="background-color: ${color}40; border: 1px solid ${color};">
+              ${iconHtml}
+            </div>
+            <div class="flex flex-col">
+              <div class="flex justify-between items-center gap-4">
+                <span class="text-[9px] font-bold text-white tracking-wider">${inc.title}</span>
+                <span class="text-[8px] font-bold ${levelColor}">${inc.level}</span>
+              </div>
+              <span class="text-[11px] font-semibold text-white mt-0.5">${inc.subtitle}</span>
+            </div>
+          </div>
+        `;
+
+        circle.bindTooltip(tooltipContent, {
+          permanent: true, 
+          direction: 'right', 
+          className: 'custom-marker-tooltip',
+          offset: [10, 0],
+          opacity: 0.95
+        });
+      }
+    });
+  }
+
+  const defaultIncidents = [
+    {lat: 40.785, lng: -73.965, title: 'FIRE', subtitle: 'Uptown Residential', type: 'fire', level: 'HIGH'},
+    {lat: 40.748, lng: -74.005, title: 'FLOOD', subtitle: 'Sector 4 Riverbank', type: 'flood', level: 'HIGH'},
+    {lat: 40.758, lng: -73.915, title: 'STORM', subtitle: 'Gale Warning', type: 'storm', level: 'MEDIUM'},
+    {lat: 40.728, lng: -73.985, title: 'MEDICAL', subtitle: 'Downtown Hospital', type: 'medical', level: 'LOW'},
+    {lat: 40.718, lng: -74.005, title: 'ROAD BLOCK', subtitle: 'Main Street', type: 'roadblock', level: 'MEDIUM'},
+    {lat: 40.688, lng: -73.955, title: 'GAS LEAK', subtitle: 'Industrial Area', type: 'gas', level: 'HIGH'},
+    {lat: 40.795, lng: -73.935, type: 'police', dotOnly: true},
+    {lat: 40.745, lng: -73.885, type: 'flood', dotOnly: true},
+    {lat: 40.705, lng: -73.915, type: 'fire', dotOnly: true},
+    {lat: 40.665, lng: -73.985, type: 'storm', dotOnly: true}
+  ];
+
+  // Geolocation & User Marker
+  let userMarker = null;
+  let userAccuracyCircle = null;
+  let mockIncidentsGenerated = false;
+
+  function locateUser() {
+    if ("geolocation" in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          const accuracy = position.coords.accuracy;
+          
+          map.setView([lat, lng], 14, {animate: true});
+          
+          // Remove old markers if they exist
+          if(userMarker) map.removeLayer(userMarker);
+          if(userAccuracyCircle) map.removeLayer(userAccuracyCircle);
+
+          // Add Accuracy Cone/Circle
+          userAccuracyCircle = L.circle([lat, lng], {
+            radius: accuracy > 500 ? 500 : accuracy, // cap radius for display
+            fillColor: '#3B82F6',
+            color: '#3B82F6',
+            weight: 1,
+            opacity: 0.2,
+            fillOpacity: 0.1
+          }).addTo(map);
+
+          // Add Blue Dot
+          userMarker = L.circleMarker([lat, lng], {
+            radius: 8,
+            fillColor: '#3B82F6',
+            color: '#ffffff',
+            weight: 3,
+            opacity: 1,
+            fillOpacity: 1,
+            className: 'user-location-pulse'
+          }).addTo(map);
+          
+          // Generate mock incidents around the user's location only once
+          if (!mockIncidentsGenerated) {
+            const userIncidents = [
+              {lat: lat + 0.015, lng: lng - 0.02, title: 'FIRE', subtitle: 'Residential Block', type: 'fire', level: 'HIGH'},
+              {lat: lat - 0.012, lng: lng - 0.03, title: 'FLOOD', subtitle: 'Local Riverbank', type: 'flood', level: 'HIGH'},
+              {lat: lat + 0.02, lng: lng + 0.01, title: 'STORM', subtitle: 'Gale Warning', type: 'storm', level: 'MEDIUM'},
+              {lat: lat - 0.025, lng: lng + 0.02, title: 'MEDICAL', subtitle: 'City Hospital', type: 'medical', level: 'LOW'},
+              {lat: lat - 0.005, lng: lng + 0.04, title: 'ROAD BLOCK', subtitle: 'Highway I-4', type: 'roadblock', level: 'MEDIUM'},
+              {lat: lat - 0.04, lng: lng - 0.01, title: 'GAS LEAK', subtitle: 'Industrial Zone', type: 'gas', level: 'HIGH'},
+              {lat: lat + 0.03, lng: lng - 0.01, type: 'police', dotOnly: true},
+              {lat: lat - 0.02, lng: lng - 0.04, type: 'flood', dotOnly: true},
+              {lat: lat + 0.005, lng: lng + 0.03, type: 'fire', dotOnly: true}
+            ];
+            renderIncidents(userIncidents);
+            mockIncidentsGenerated = true;
+          }
+        },
+        function(error) {
+          console.warn("Geolocation failed or denied, falling back to default.", error);
+          if (!mockIncidentsGenerated) {
+             renderIncidents(defaultIncidents);
+             mockIncidentsGenerated = true;
+          }
+        },
+        { timeout: 5000, enableHighAccuracy: true }
+      );
+    } else {
+      if (!mockIncidentsGenerated) {
+        renderIncidents(defaultIncidents);
+        mockIncidentsGenerated = true;
+      }
+    }
+  }
+
+  // Initial call on page load
+  locateUser();
+
+  const route = [
+    [40.785, -73.965],
+    [40.765, -73.985],
+    [40.748, -74.005],
+    [40.718, -74.005]
+  ];
+  L.polyline(route, {
+    color: '#d1d5db',
+    weight: 3,
+    opacity: 0.6,
+    className: 'glow-line'
+  }).addTo(map);
+
+
+  let isSatellite = false;
+  function toggleMapLayer() {
+    if(isSatellite) {
+      map.removeLayer(currentLayer);
+      currentLayer = L.tileLayer(darkLayerUrl, {maxZoom: 19}).addTo(map);
+      // Need to push to back so markers are on top
+      currentLayer.bringToBack();
+      isSatellite = false;
+      showToast('Switched to Map view.', 'info');
+    } else {
+      map.removeLayer(currentLayer);
+      currentLayer = L.tileLayer(satelliteLayerUrl, {maxZoom: 19}).addTo(map);
+      currentLayer.bringToBack();
+      isSatellite = true;
+      showToast('Switched to Satellite view.', 'info');
+    }
+  }
+
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen().catch((err) => {
+        showToast('Error enabling fullscreen.', 'error');
+      });
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      }
+    }
+  }
+</script>
+
+<style>
+  .glow-line {
+    filter: drop-shadow(0 0 4px #ffffff);
+  }
+  .custom-marker-tooltip {
+    background: rgba(11, 17, 32, 0.85) !important;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  /* Remove tooltip pointer */
+  .leaflet-tooltip-right::before {
+    display: none !important;
+  }
+
+  .user-location-pulse {
+    filter: drop-shadow(0 0 6px rgba(59,130,246, 0.8));
+    animation: bluePulse 2s infinite;
+  }
+  @keyframes bluePulse {
+    0% { filter: drop-shadow(0 0 6px rgba(59,130,246, 0.8)); }
+    50% { filter: drop-shadow(0 0 12px rgba(59,130,246, 1)); }
+    100% { filter: drop-shadow(0 0 6px rgba(59,130,246, 0.8)); }
+  }
+
+</style>
+{% endblock %}

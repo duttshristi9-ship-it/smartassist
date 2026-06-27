@@ -1,0 +1,296 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
+
+/* Base Styles & Tactical Command Theme */
+:root {
+  --bg-dark: #0B1120;
+  --bg-panel: rgba(15, 23, 42, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+  --primary: #3B82F6;
+  --secondary: #10B981;
+  --accent-neon: #38BDF8;
+  --accent-red: #EF4444;
+  --accent-orange: #F97316;
+  --accent-green: #10B981;
+  --bg-card: #1E293B;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg-dark);
+  color: #F8FAFC;
+}
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: 'Outfit', sans-serif;
+}
+
+/* Custom Premium Tactical Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(11, 17, 32, 0.5);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(59, 130, 246, 0.25);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(59, 130, 246, 0.4);
+}
+
+/* Glassmorphism Command Panels */
+.glass-panel {
+  background: var(--bg-panel);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px; /* Tactical sharper corners */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.4);
+}
+.glass-card:hover {
+  border-color: rgba(59, 130, 246, 0.25);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.1);
+}
+
+/* Text Gradients */
+.text-gradient {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+.text-gradient-danger {
+  background: linear-gradient(135deg, #ff3b30, #ff8c00);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  display: inline-block;
+}
+
+/* Vibrant Buttons */
+.btn-vibrant {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  color: white;
+  border: none;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 20px rgba(217, 70, 239, 0.3);
+}
+.btn-vibrant:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(0, 240, 255, 0.5);
+  color: white;
+}
+.btn-danger-vibrant {
+  background: linear-gradient(135deg, #ff3b30, #dc2626);
+  color: white;
+  box-shadow: 0 4px 20px rgba(255, 59, 48, 0.3);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.btn-danger-vibrant:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(255, 59, 48, 0.5);
+}
+
+/* Forms */
+.glass-input {
+  background: rgba(8, 4, 13, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  color: white;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.glass-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(217, 70, 239, 0.15);
+  background: rgba(8, 4, 13, 0.8);
+}
+.glass-input::placeholder {
+  color: #4b4457;
+}
+
+/* Custom CSS Animations */
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-slide-up {
+  animation: slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+  opacity: 0;
+}
+
+@keyframes pulse-glow-amethyst {
+  0% { box-shadow: 0 0 0 0 rgba(217, 70, 239, 0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(217, 70, 239, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(217, 70, 239, 0); }
+}
+.glow-red {
+  animation: pulse-glow-amethyst 2s infinite;
+}
+
+@keyframes pulse-glow-teal {
+  0% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(0, 240, 255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 240, 255, 0); }
+}
+.glow-blue {
+  animation: pulse-glow-teal 2s infinite;
+}
+
+@keyframes pulse-glow-amber {
+  0% { box-shadow: 0 0 0 0 rgba(255, 140, 0, 0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(255, 140, 0, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 140, 0, 0); }
+}
+.glow-orange {
+  animation: pulse-glow-amber 2s infinite;
+}
+
+.float-anim {
+  animation: float 6s ease-in-out infinite;
+}
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+  100% { transform: translateY(0px); }
+}
+
+/* Chatbot Specific */
+.bot-msg {
+  background: rgba(18, 12, 30, 0.85);
+  border-bottom-left-radius: 2px;
+  border: 1px solid var(--glass-border);
+}
+.user-msg {
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
+  border-bottom-right-radius: 2px;
+}
+.typing-indicator span {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  background-color: #6d5b7a;
+  border-radius: 50%;
+  margin-right: 3px;
+  animation: typing 1s infinite alternate;
+}
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; margin-right: 0; }
+@keyframes typing {
+  0% { transform: translateY(0); opacity: 0.4; }
+  100% { transform: translateY(-3px); opacity: 1; }
+}
+
+/* DataTables Overrides for Dark Mode */
+.dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing, .dataTables_wrapper .dataTables_paginate {
+  color: #6d5b7a !important;
+}
+table.dataTable.no-footer {
+  border-bottom: 1px solid var(--glass-border) !important;
+}
+table.dataTable thead th {
+  border-bottom: 1px solid var(--glass-border) !important;
+  color: #f8fafc;
+}
+table.dataTable tbody tr {
+  background-color: transparent !important;
+}
+table.dataTable tbody tr:hover {
+  background-color: rgba(217, 70, 239, 0.03) !important;
+}
+table.dataTable tbody td {
+  border-top: 1px solid var(--glass-border) !important;
+}
+
+/* Custom Marker Styling for Map */
+.custom-leaflet-marker {
+  width: 14px !important;
+  height: 14px !important;
+  border-radius: 50%;
+  border: 2px solid #ffffff;
+  position: relative;
+}
+
+/* Incident Marker Colors */
+.custom-leaflet-marker-fire { background-color: #EF4444; box-shadow: 0 0 10px #EF4444, 0 0 20px #EF4444; }
+.custom-leaflet-marker-flood { background-color: #38BDF8; box-shadow: 0 0 10px #38BDF8, 0 0 20px #38BDF8; }
+.custom-leaflet-marker-earthquake { background-color: #F59E0B; box-shadow: 0 0 10px #F59E0B, 0 0 20px #F59E0B; }
+.custom-leaflet-marker-medical { background-color: #A855F7; box-shadow: 0 0 10px #A855F7, 0 0 20px #A855F7; }
+.custom-leaflet-marker-storm { background-color: #38BDF8; box-shadow: 0 0 10px #38BDF8, 0 0 20px #38BDF8; }
+.custom-leaflet-marker-road { background-color: #F59E0B; box-shadow: 0 0 10px #F59E0B, 0 0 20px #F59E0B; }
+.custom-leaflet-marker-gas { background-color: #EF4444; box-shadow: 0 0 10px #EF4444, 0 0 20px #EF4444; }
+.custom-leaflet-marker-police { background-color: #38BDF8; box-shadow: 0 0 10px #38BDF8, 0 0 20px #38BDF8; }
+
+.custom-marker-pulse {
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: transparent;
+  pointer-events: none;
+}
+
+/* Keyframes for different color pulses */
+@keyframes pulse-fire { 0% { box-shadow: 0 0 0 0 rgba(239,68,68, 0.5); } 70% { box-shadow: 0 0 0 10px rgba(239,68,68, 0); } 100% { box-shadow: 0 0 0 0 rgba(239,68,68, 0); } }
+@keyframes pulse-blue { 0% { box-shadow: 0 0 0 0 rgba(56,189,248, 0.5); } 70% { box-shadow: 0 0 0 10px rgba(56,189,248, 0); } 100% { box-shadow: 0 0 0 0 rgba(56,189,248, 0); } }
+@keyframes pulse-orange { 0% { box-shadow: 0 0 0 0 rgba(245,158,11, 0.5); } 70% { box-shadow: 0 0 0 10px rgba(245,158,11, 0); } 100% { box-shadow: 0 0 0 0 rgba(245,158,11, 0); } }
+@keyframes pulse-purple { 0% { box-shadow: 0 0 0 0 rgba(168,85,247, 0.5); } 70% { box-shadow: 0 0 0 10px rgba(168,85,247, 0); } 100% { box-shadow: 0 0 0 0 rgba(168,85,247, 0); } }
+
+.custom-leaflet-marker-fire .custom-marker-pulse, .custom-leaflet-marker-gas .custom-marker-pulse { border: 1px solid rgba(239, 68, 68, 0.4); animation: pulse-fire 1.5s infinite; }
+.custom-leaflet-marker-flood .custom-marker-pulse, .custom-leaflet-marker-storm .custom-marker-pulse, .custom-leaflet-marker-police .custom-marker-pulse { border: 1px solid rgba(56, 189, 248, 0.4); animation: pulse-blue 1.5s infinite; }
+.custom-leaflet-marker-earthquake .custom-marker-pulse, .custom-leaflet-marker-road .custom-marker-pulse { border: 1px solid rgba(245, 158, 11, 0.4); animation: pulse-orange 1.5s infinite; }
+.custom-leaflet-marker-medical .custom-marker-pulse { border: 1px solid rgba(168, 85, 247, 0.4); animation: pulse-purple 1.5s infinite; }
+
+/* Custom Popups inside Leaflet */
+.leaflet-popup-content-wrapper {
+  background: var(--bg-panel) !important;
+  backdrop-filter: blur(16px) !important;
+  border: 1px solid var(--glass-border) !important;
+  color: #ffffff !important;
+  border-radius: 12px !important;
+  box-shadow: var(--glass-shadow) !important;
+}
+.leaflet-popup-tip {
+  background: var(--bg-panel) !important;
+  border: 1px solid var(--glass-border) !important;
+}
+.leaflet-container a.leaflet-popup-close-button {
+  color: #94a3b8 !important;
+}
+
+/* Glass panel scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 99px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(217, 70, 239, 0.15);
+}
+
+/* Custom Floating HUD Styles */
+.hud-panel {
+  pointer-events: auto;
+  border: 1px solid rgba(217, 70, 239, 0.07);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  background: rgba(14, 8, 22, 0.78);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+.hud-panel:hover {
+  border-color: rgba(217, 70, 239, 0.2);
+}

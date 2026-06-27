@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}{{ disaster.title }}{% endblock %}
+{% block page_title %}{{ disaster.icon }} {{ disaster.title }}{% endblock %}
+{% block header_actions %}
+<a href="{{ url_for('dashboard.index') }}" class="px-4 py-2 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700 transition-colors text-sm font-medium mr-2">
+  <i class="ri-arrow-left-line"></i> Dashboard
+</a>
+<a href="{{ url_for('chat.chatbot') }}?q=Tell me about {{ dtype }} safety" class="btn-vibrant px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2">
+  <i class="ri-robot-2-fill"></i> Ask AI
+</a>
+{% endblock %}
+
+{% block content %}
+<div class="grid lg:grid-cols-2 gap-6 mb-6">
+  
+  <!-- Overview -->
+  <div class="glass-card p-6 md:p-8 flex flex-col justify-between">
+    <div>
+      <div class="w-16 h-16 rounded-2xl bg-blue-500/10 border border-blue-500/20 flex items-center justify-center text-4xl mb-6 shadow-lg shadow-blue-500/10">
+        {{ disaster.icon }}
+      </div>
+      <h2 class="text-2xl font-bold text-white mb-6 font-heading">{{ disaster.title }} Overview</h2>
+      
+      <div class="mb-6">
+        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+          <i class="ri-information-line"></i> Causes
+        </h3>
+        <p class="text-slate-300 text-sm leading-relaxed">{{ disaster.causes }}</p>
+      </div>
+      
+      <div class="mb-6">
+        <h3 class="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 flex items-center gap-2">
+          <i class="ri-alarm-warning-line"></i> Warning Signs
+        </h3>
+        <p class="text-slate-300 text-sm leading-relaxed">{{ disaster.warning_signs }}</p>
+      </div>
+    </div>
+    
+    <!-- Emergency Contacts -->
+    <div class="mt-8 pt-6 border-t border-slate-700/50">
+      <h3 class="text-xs font-bold text-red-500 uppercase tracking-wider mb-4 flex items-center gap-2">
+        <i class="ri-phone-fill"></i> Emergency Contacts
+      </h3>
+      <div class="grid sm:grid-cols-2 gap-3">
+        {% for name, number in disaster.contacts %}
+        <div class="flex items-center justify-between p-3 rounded-xl bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 transition-colors">
+          <span class="text-sm font-medium text-slate-300">{{ name }}</span>
+          <span class="text-lg font-black text-red-400 tracking-wider font-mono">{{ number }}</span>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Do's and Don'ts -->
+  <div class="space-y-6">
+    <!-- DO's -->
+    <div class="glass-card p-6 md:p-8 border-emerald-500/30 relative overflow-hidden group">
+      <div class="absolute -right-10 -top-10 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all duration-500"></div>
+      <h3 class="text-lg font-bold text-emerald-400 mb-6 font-heading flex items-center gap-2">
+        <i class="ri-checkbox-circle-fill text-xl"></i> DO's — Safety Actions
+      </h3>
+      <ul class="space-y-3 relative z-10">
+        {% for item in disaster.dos %}
+        <li class="flex items-start gap-3 text-sm text-slate-300 leading-relaxed">
+          <i class="ri-check-line text-emerald-400 mt-0.5 font-bold"></i>
+          <span>{{ item }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    
+    <!-- DON'Ts -->
+    <div class="glass-card p-6 md:p-8 border-red-500/30 relative overflow-hidden group">
+      <div class="absolute -right-10 -top-10 w-32 h-32 bg-red-500/10 rounded-full blur-2xl group-hover:bg-red-500/20 transition-all duration-500"></div>
+      <h3 class="text-lg font-bold text-red-400 mb-6 font-heading flex items-center gap-2">
+        <i class="ri-close-circle-fill text-xl"></i> DON'Ts — Avoid These
+      </h3>
+      <ul class="space-y-3 relative z-10">
+        {% for item in disaster.donts %}
+        <li class="flex items-start gap-3 text-sm text-slate-300 leading-relaxed">
+          <i class="ri-close-line text-red-400 mt-0.5 font-bold"></i>
+          <span>{{ item }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- AI Chat CTA -->
+<div class="glass-card p-10 text-center relative overflow-hidden bg-gradient-to-br from-slate-900 to-blue-900/40 border-blue-500/30">
+  <!-- Decorative background -->
+  <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoNTksIDEzMCwgMjQ2LCAwLjIpIi8+PC9zdmc+')] opacity-20"></div>
+  
+  <div class="relative z-10 max-w-2xl mx-auto flex flex-col items-center">
+    <div class="w-16 h-16 rounded-full bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-4xl mb-6 float-anim shadow-lg shadow-blue-500/20 text-blue-400">
+      <i class="ri-robot-2-fill"></i>
+    </div>
+    <h3 class="text-2xl font-bold text-white mb-3 font-heading">Need Personalized Guidance?</h3>
+    <p class="text-slate-400 mb-8 leading-relaxed">Our AI chatbot can provide real-time, context-aware guidance for your specific emergency situation based on current conditions.</p>
+    <a href="{{ url_for('chat.chatbot') }}?q=I need help with {{ dtype }} emergency" class="btn-vibrant px-8 py-3 rounded-full text-sm font-semibold flex items-center gap-2 shadow-xl shadow-blue-500/20">
+      <i class="ri-chat-3-line"></i> Ask AI Chatbot Now
+    </a>
+  </div>
+</div>
+{% endblock %}

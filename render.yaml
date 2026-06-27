@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: smartassist
+    env: python
+    buildCommand: pip install -r requirements.txt && python -m spacy download en_core_web_sm
+    startCommand: gunicorn wsgi:app -k eventlet -w 1
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: smartassist-db
+          property: connectionString
+      - key: REDIS_URL
+        value: ""
+
+databases:
+  - name: smartassist-db
+    plan: free
